@@ -8,10 +8,10 @@ pub fn get_sea_level_pressure(
     let hpa = pressure.amount;
     let meters = altitude.amount;
     let sea_level_hpa = hpa * (1.0 - meters / 44330.0).powf(-5.255);
-    return Quantity {
+    Quantity {
         amount: sea_level_hpa,
         units: Pressure::Hectopascals,
-    };
+    }
 }
 
 #[cfg(test)]
