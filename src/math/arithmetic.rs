@@ -27,6 +27,30 @@ pub fn cube<T: Number>(value: T) -> T {
     value * value * value
 }
 
+pub fn greatest_common_divisor<T: Number>(a: T, b: T, precision: Option<T>) -> T {
+    let max_iterations = 1000;
+    let precision = precision.unwrap_or(T::from_f64(0.0001));
+    let mut current_a = a;
+    let mut current_b = b;
+    let mut iterations = 0;
+
+    while current_b.abs() > precision && iterations < max_iterations {
+        let temp = current_b;
+        current_b = current_a % current_b;
+        current_a = temp;
+        iterations += 1;
+    }
+
+    current_a
+}
+
+pub fn least_common_multiple<T: Number>(a: T, b: T) -> T {
+    if a == T::from_i32(0) || b == T::from_i32(0) {
+        return T::from_i32(0);
+    }
+    a.abs() * (b.abs() / greatest_common_divisor(a, b, None))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -170,5 +194,54 @@ mod tests {
     fn test_power(#[case] base: f64, #[case] exponent: f64, #[case] expected: f64) {
         let result = power(base, exponent);
         assert!((result - expected).abs() < 1e-10);
+    }
+
+    #[rstest]
+    #[case(1.0, 1.0, 1.0)]
+    #[case(1.5, 1.0, 0.5)]
+    #[case(1.4, 1.0, 0.2)]
+    #[case(0.01, 3.8, 0.01)]
+    #[case(0.0, 1.0, 1.0)]
+    #[case(1.0, 0.0, 1.0)]
+    #[case(0.0, 0.0, 0.0)]
+    fn test_greatest_common_divisor(#[case] a: f64, #[case] b: f64, #[case] expected: f64) {
+        let result = greatest_common_divisor(a, b, None);
+        assert!(
+            (result - expected).abs() < 1e-10,
+            "Expected {} but got {}",
+            expected,
+            result
+        );
+    }
+
+    #[rstest]
+    #[case(1, 1, 1)]
+    #[case(100, 200, 100)]
+    #[case(200, 100, 100)]
+    #[case(0, 0, 0)]
+    #[case(0, 1, 1)]
+    #[case(1, 0, 1)]
+    #[case(-1, 1, 1)]
+    #[case(400, 600, 200)]
+    fn test_greatest_common_divisor_int(#[case] a: i32, #[case] b: i32, #[case] expected: i32) {
+        assert_eq!(greatest_common_divisor(a, b, None), expected);
+    }
+
+    #[rstest]
+    #[case(1.0, 1.0, 1.0)]
+    #[case(1.5, 1.0, 3.0)]
+    #[case(1.4, 1.0, 7.0)]
+    #[case(0.01, 3.8, 3.8)]
+    #[case(0.0, 1.0, 0.0)]
+    #[case(1.0, 0.0, 0.0)]
+    #[case(0.0, 0.0, 0.0)]
+    fn test_least_common_multiple(#[case] a: f64, #[case] b: f64, #[case] expected: f64) {
+        let result = least_common_multiple(a, b);
+        assert!(
+            (result - expected).abs() < 1e-10,
+            "Expected {} but got {}",
+            expected,
+            result
+        );
     }
 }

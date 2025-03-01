@@ -1,6 +1,19 @@
 use core::ops::{AddAssign, DivAssign, MulAssign, RemAssign, SubAssign};
 use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
 
+pub trait Abs {
+    fn abs(&self) -> Self;
+}
+
+pub trait Round {
+    fn round(&self) -> Self;
+}
+
+pub trait Power {
+    fn powi(&self, exp: i32) -> Self;
+    fn powf(&self, exp: Self) -> Self;
+}
+
 pub trait Number:
     Add<Output = Self>
     + Sub<Output = Self>
@@ -17,6 +30,7 @@ pub trait Number:
     + PartialOrd
     + Copy
     + Default
+    + Abs
 {
     fn from_i32(value: i32) -> Self;
     fn from_i64(value: i64) -> Self;
@@ -29,8 +43,60 @@ pub trait Number:
 }
 
 pub trait Integer: Number {}
-pub trait Real: Number {
-    fn round(&self) -> Self;
+pub trait Real: Number + Round + Power {}
+
+impl Abs for f32 {
+    fn abs(&self) -> Self {
+        (*self).abs()
+    }
+}
+
+impl Abs for f64 {
+    fn abs(&self) -> Self {
+        (*self).abs()
+    }
+}
+
+impl Abs for i32 {
+    fn abs(&self) -> Self {
+        (*self).abs()
+    }
+}
+
+impl Abs for i64 {
+    fn abs(&self) -> Self {
+        (*self).abs()
+    }
+}
+
+impl Round for f32 {
+    fn round(&self) -> Self {
+        (*self).round()
+    }
+}
+
+impl Round for f64 {
+    fn round(&self) -> Self {
+        (*self).round()
+    }
+}
+
+impl Power for f32 {
+    fn powi(&self, exp: i32) -> Self {
+        (*self).powi(exp)
+    }
+    fn powf(&self, exp: Self) -> Self {
+        (*self).powf(exp)
+    }
+}
+
+impl Power for f64 {
+    fn powi(&self, exp: i32) -> Self {
+        (*self).powi(exp)
+    }
+    fn powf(&self, exp: Self) -> Self {
+        (*self).powf(exp)
+    }
 }
 
 impl Number for f32 {
@@ -141,13 +207,5 @@ impl Number for i64 {
 impl Integer for i32 {}
 impl Integer for i64 {}
 
-impl Real for f32 {
-    fn round(&self) -> Self {
-        (*self).round()
-    }
-}
-impl Real for f64 {
-    fn round(&self) -> Self {
-        (*self).round()
-    }
-}
+impl Real for f32 {}
+impl Real for f64 {}
