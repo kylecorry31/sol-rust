@@ -53,6 +53,41 @@ impl<U: Unit> std::ops::Mul<Quantity<U>> for f32 {
     }
 }
 
+impl<U: Unit> std::ops::Div<f32> for Quantity<U> {
+    type Output = Self;
+
+    fn div(self, rhs: f32) -> Self {
+        Quantity {
+            amount: self.amount / rhs,
+            units: self.units,
+        }
+    }
+}
+
+impl<U: Unit> std::ops::Add for Quantity<U> {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self {
+        let converted = rhs.convert(self.units);
+        Quantity {
+            amount: self.amount + converted.amount,
+            units: self.units,
+        }
+    }
+}
+
+impl<U: Unit> std::ops::Sub for Quantity<U> {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self {
+        let converted = rhs.convert(self.units);
+        Quantity {
+            amount: self.amount - converted.amount,
+            units: self.units,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -93,6 +128,97 @@ mod tests {
             2.0 * q,
             Quantity {
                 amount: 20.0,
+                units: TestUnit::Base,
+            }
+        );
+    }
+
+    #[test]
+    fn test_quantity_div_f32() {
+        let q = Quantity {
+            amount: 10.0,
+            units: TestUnit::Base,
+        };
+        assert_eq!(
+            q / 2.0,
+            Quantity {
+                amount: 5.0,
+                units: TestUnit::Base,
+            }
+        );
+    }
+
+    #[test]
+    fn test_quantity_add() {
+        let q1 = Quantity {
+            amount: 10.0,
+            units: TestUnit::Base,
+        };
+        let q2 = Quantity {
+            amount: 20.0,
+            units: TestUnit::Base,
+        };
+        assert_eq!(
+            q1 + q2,
+            Quantity {
+                amount: 30.0,
+                units: TestUnit::Base,
+            }
+        );
+    }
+
+    #[test]
+    fn test_quantity_add_different_units() {
+        let q1 = Quantity {
+            amount: 10.0,
+            units: TestUnit::Base,
+        };
+        let q2 = Quantity {
+            amount: 20.0,
+            units: TestUnit::Base,
+        };
+        assert_eq!(
+            q1 + q2,
+            Quantity {
+                amount: 30.0,
+                units: TestUnit::Base,
+            }
+        );
+    }
+
+    #[test]
+    fn test_quantity_sub() {
+        let q1 = Quantity {
+            amount: 30.0,
+            units: TestUnit::Base,
+        };
+        let q2 = Quantity {
+            amount: 20.0,
+            units: TestUnit::Base,
+        };
+        assert_eq!(
+            q1 - q2,
+            Quantity {
+                amount: 10.0,
+                units: TestUnit::Base,
+            }
+        );
+    }
+
+    #[test]
+    fn test_quantity_sub_different_units() {
+        let q1 = Quantity {
+            amount: 30.0,
+            units: TestUnit::Base,
+        };
+        let q2 = Quantity {
+            amount: 20.0,
+            units: TestUnit::Base,
+        };
+        assert_eq!(
+            q1 - q2,
+            Quantity {
+                amount: 10.0,
                 units: TestUnit::Base,
             }
         );
