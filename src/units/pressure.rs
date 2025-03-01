@@ -1,4 +1,4 @@
-use super::quantity::{Quantity, Unit};
+use super::quantity::Unit;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Pressure {
@@ -27,82 +27,52 @@ impl Unit for Pressure {
     }
 }
 
-// Define some quantities for easier usage
-pub const HECTOPASCAL: Quantity<Pressure> = Quantity {
-    amount: 1.0,
-    units: Pressure::Hectopascals,
-};
-
-pub const PASCAL: Quantity<Pressure> = Quantity {
-    amount: 1.0,
-    units: Pressure::Pascals,
-};
-
-pub const BAR: Quantity<Pressure> = Quantity {
-    amount: 1.0,
-    units: Pressure::Bars,
-};
-
-pub const MILLIBAR: Quantity<Pressure> = Quantity {
-    amount: 1.0,
-    units: Pressure::Millibars,
-};
-
-pub const INCH_HG: Quantity<Pressure> = Quantity {
-    amount: 1.0,
-    units: Pressure::InchesHg,
-};
-
-pub const PSI: Quantity<Pressure> = Quantity {
-    amount: 1.0,
-    units: Pressure::PoundsPerSquareInch,
-};
-
-pub const MM_HG: Quantity<Pressure> = Quantity {
-    amount: 1.0,
-    units: Pressure::MillimetersHg,
-};
-
-pub const ATM: Quantity<Pressure> = Quantity {
-    amount: 1.0,
-    units: Pressure::Atmospheres,
-};
-
 #[cfg(test)]
 mod tests {
+    use rstest::rstest;
+
     use crate::units::{
-        pressure::{ATM, BAR, HECTOPASCAL, INCH_HG, MILLIBAR, MM_HG, PASCAL, PSI, Pressure},
+        pressure::Pressure,
         quantity::{Convertable, Quantity},
     };
 
-    #[test]
-    fn can_convert_between_pressure_units() {
-        assert_quantities_eq(HECTOPASCAL.convert(Pressure::Pascals), PASCAL * 100.0);
-        assert_quantities_eq(PASCAL.convert(Pressure::Hectopascals), HECTOPASCAL * 0.01);
-        assert_quantities_eq(PASCAL.convert(Pressure::Pascals), PASCAL);
-        assert_quantities_eq(BAR.convert(Pressure::Pascals), PASCAL * 100000.0);
-        assert_quantities_eq(MILLIBAR.convert(Pressure::Pascals), PASCAL * 100.0);
-        assert_quantities_eq(INCH_HG.convert(Pressure::Pascals), PASCAL * 3386.389);
-        assert_quantities_eq(PSI.convert(Pressure::Pascals), PASCAL * 6894.757);
-        assert_quantities_eq(MM_HG.convert(Pressure::Pascals), PASCAL * 133.322);
-        assert_quantities_eq(ATM.convert(Pressure::Pascals), PASCAL * 101325.0);
-
-        // Test conversions between non-base units
-        assert_quantities_eq(BAR.convert(Pressure::Hectopascals), HECTOPASCAL * 1000.0);
-        assert_quantities_eq(ATM.convert(Pressure::Bars), BAR * 1.01325);
-        assert_quantities_eq(PSI.convert(Pressure::InchesHg), INCH_HG * 2.036);
-        assert_quantities_eq(MM_HG.convert(Pressure::Millibars), MILLIBAR * 1.33322);
-    }
-
-    fn assert_quantities_eq(q1: Quantity<Pressure>, q2: Quantity<Pressure>) {
+    #[rstest]
+    #[case(1.0, Pressure::Pascals, Pressure::Hectopascals, 0.01)]
+    #[case(1.0, Pressure::Pascals, Pressure::Bars, 0.00001)]
+    #[case(1.0, Pressure::Pascals, Pressure::Millibars, 0.01)]
+    #[case(1.0, Pressure::Pascals, Pressure::InchesHg, 0.0002953)]
+    #[case(1.0, Pressure::Pascals, Pressure::PoundsPerSquareInch, 0.000145038)]
+    #[case(1.0, Pressure::Pascals, Pressure::MillimetersHg, 0.00750062)]
+    #[case(1.0, Pressure::Pascals, Pressure::Atmospheres, 0.0000101325)]
+    #[case(1.0, Pressure::Hectopascals, Pressure::Pascals, 100.0)]
+    #[case(1.0, Pressure::Bars, Pressure::Pascals, 100000.0)]
+    #[case(1.0, Pressure::Millibars, Pressure::Pascals, 100.0)]
+    #[case(1.0, Pressure::InchesHg, Pressure::Pascals, 3386.389)]
+    #[case(1.0, Pressure::PoundsPerSquareInch, Pressure::Pascals, 6894.757)]
+    #[case(1.0, Pressure::MillimetersHg, Pressure::Pascals, 133.322)]
+    #[case(1.0, Pressure::Atmospheres, Pressure::Pascals, 101325.0)]
+    #[case(1.0, Pressure::Bars, Pressure::Hectopascals, 1000.0)]
+    #[case(1.0, Pressure::Millibars, Pressure::Hectopascals, 1.0)]
+    #[case(1.0, Pressure::InchesHg, Pressure::Bars, 0.033864)]
+    #[case(1.0, Pressure::PoundsPerSquareInch, Pressure::Millibars, 68.9476)]
+    #[case(1.0, Pressure::MillimetersHg, Pressure::InchesHg, 0.0393701)]
+    #[case(1.0, Pressure::Atmospheres, Pressure::Bars, 1.01325)]
+    fn can_convert_between_pressure_units(
+        #[case] amount: f32,
+        #[case] units: Pressure,
+        #[case] to_units: Pressure,
+        #[case] expected_amount: f32,
+    ) {
+        let actual = Quantity { amount, units }.convert(to_units);
         assert!(
-            (q1.amount - q2.amount).abs() <= 0.0001,
+            (actual.amount - expected_amount).abs() <= 0.0001,
             "quantities not equal - expected: {} {:?}, actual: {} {:?}",
-            q1.amount,
-            q1.units,
-            q2.amount,
-            q2.units
+            actual.amount,
+            actual.units,
+            expected_amount,
+            to_units
         );
-        assert_eq!(q1.units, q2.units);
+
+        assert_eq!(actual.units, to_units);
     }
 }

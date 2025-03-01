@@ -1,4 +1,4 @@
-use super::quantity::{Quantity, Unit};
+use super::quantity::Unit;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Distance {
@@ -29,106 +29,54 @@ impl Unit for Distance {
     }
 }
 
-// Define some quantities for easier usage
-pub const METER: Quantity<Distance> = Quantity {
-    amount: 1.0,
-    units: Distance::Meters,
-};
-
-pub const MILLIMETER: Quantity<Distance> = Quantity {
-    amount: 1.0,
-    units: Distance::Millimeters,
-};
-
-pub const CENTIMETER: Quantity<Distance> = Quantity {
-    amount: 1.0,
-    units: Distance::Centimeters,
-};
-
-pub const KILOMETER: Quantity<Distance> = Quantity {
-    amount: 1.0,
-    units: Distance::Kilometers,
-};
-
-pub const INCH: Quantity<Distance> = Quantity {
-    amount: 1.0,
-    units: Distance::Inches,
-};
-
-pub const FOOT: Quantity<Distance> = Quantity {
-    amount: 1.0,
-    units: Distance::Feet,
-};
-
-pub const YARD: Quantity<Distance> = Quantity {
-    amount: 1.0,
-    units: Distance::Yards,
-};
-
-pub const MILE: Quantity<Distance> = Quantity {
-    amount: 1.0,
-    units: Distance::Miles,
-};
-
-pub const NAUTICAL_MILE: Quantity<Distance> = Quantity {
-    amount: 1.0,
-    units: Distance::NauticalMiles,
-};
-
 #[cfg(test)]
 mod tests {
     use crate::units::{
-        distance::{
-            CENTIMETER, Distance, FOOT, INCH, KILOMETER, METER, MILE, MILLIMETER, NAUTICAL_MILE,
-            YARD,
-        },
+        distance::Distance,
         quantity::{Convertable, Quantity},
     };
 
-    #[test]
-    fn can_convert_between_distance_units() {
-        assert_quantities_eq(KILOMETER.convert(Distance::Meters), METER * 1000.0);
-        assert_quantities_eq(METER.convert(Distance::Kilometers), KILOMETER * 0.001);
-        assert_quantities_eq(CENTIMETER.convert(Distance::Meters), METER * 0.01);
-        assert_quantities_eq(MILLIMETER.convert(Distance::Meters), METER * 0.001);
-        assert_quantities_eq(MILLIMETER.convert(Distance::Centimeters), CENTIMETER * 0.1);
-        assert_quantities_eq(MILLIMETER.convert(Distance::Millimeters), MILLIMETER * 1.0);
-        assert_quantities_eq(
-            (CENTIMETER * 5.0).convert(Distance::Kilometers),
-            KILOMETER * 0.00005,
-        );
+    use rstest::rstest;
 
-        // Imperial unit conversions
-        assert_quantities_eq(FOOT.convert(Distance::Inches), INCH * 12.0);
-        assert_quantities_eq(YARD.convert(Distance::Feet), FOOT * 3.0);
-        assert_quantities_eq(MILE.convert(Distance::Feet), FOOT * 5280.0);
-
-        // Imperial to metric conversions
-        assert_quantities_eq(FOOT.convert(Distance::Meters), METER * 0.3048);
-        assert_quantities_eq(YARD.convert(Distance::Meters), METER * 0.9144);
-        assert_quantities_eq(MILE.convert(Distance::Kilometers), KILOMETER * 1.609344);
-
-        // Nautical mile conversions
-        assert_quantities_eq(
-            NAUTICAL_MILE.convert(Distance::Kilometers),
-            KILOMETER * 1.852,
-        );
-        assert_quantities_eq(NAUTICAL_MILE.convert(Distance::Miles), MILE * 1.15078);
-
-        // Zero conversions
-        assert_quantities_eq((METER * 0.0).convert(Distance::Feet), FOOT * 0.0);
-        assert_quantities_eq((FOOT * 0.0).convert(Distance::Meters), METER * 0.0);
-    }
-
-    fn assert_quantities_eq(q1: Quantity<Distance>, q2: Quantity<Distance>) {
+    #[rstest]
+    #[case(1.0, Distance::Meters, Distance::Meters, 1.0)]
+    #[case(1.0, Distance::Meters, Distance::Kilometers, 0.001)]
+    #[case(1.0, Distance::Meters, Distance::Miles, 0.000621371)]
+    #[case(1.0, Distance::Meters, Distance::NauticalMiles, 0.000539957)]
+    #[case(1.0, Distance::Meters, Distance::Feet, 3.28084)]
+    #[case(1.0, Distance::Meters, Distance::Inches, 39.3701)]
+    #[case(1.0, Distance::Meters, Distance::Yards, 1.09361)]
+    #[case(1.0, Distance::Meters, Distance::Centimeters, 100.0)]
+    #[case(1.0, Distance::Meters, Distance::Millimeters, 1000.0)]
+    #[case(1.0, Distance::Kilometers, Distance::Meters, 1000.0)]
+    #[case(1.0, Distance::Miles, Distance::Meters, 1609.344)]
+    #[case(1.0, Distance::NauticalMiles, Distance::Meters, 1852.0)]
+    #[case(1.0, Distance::Feet, Distance::Meters, 0.3048)]
+    #[case(1.0, Distance::Inches, Distance::Meters, 0.0254)]
+    #[case(1.0, Distance::Yards, Distance::Meters, 0.9144)]
+    #[case(1.0, Distance::Centimeters, Distance::Meters, 0.01)]
+    #[case(1.0, Distance::Millimeters, Distance::Meters, 0.001)]
+    #[case(1.0, Distance::Kilometers, Distance::Miles, 0.621371)]
+    #[case(1.0, Distance::Miles, Distance::Kilometers, 1.60934)]
+    #[case(1.0, Distance::Feet, Distance::Inches, 12.0)]
+    #[case(1.0, Distance::Yards, Distance::Feet, 3.0)]
+    #[case(1.0, Distance::Miles, Distance::Feet, 5280.0)]
+    fn can_convert_between_distance_units(
+        #[case] amount: f32,
+        #[case] units: Distance,
+        #[case] to_units: Distance,
+        #[case] expected_amount: f32,
+    ) {
+        let actual = Quantity { amount, units }.convert(to_units);
         assert!(
-            (q1.amount - q2.amount).abs() <= 0.0001,
+            (actual.amount - expected_amount).abs() <= 0.0001,
             "quantities not equal - expected: {} {:?}, actual: {} {:?}",
-            q1.amount,
-            q1.units,
-            q2.amount,
-            q2.units
+            actual.amount,
+            actual.units,
+            expected_amount,
+            to_units
         );
-        assert_eq!(q1.units, q2.units);
+
+        assert_eq!(actual.units, to_units);
     }
 }
