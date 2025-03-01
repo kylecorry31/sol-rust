@@ -11,6 +11,14 @@ pub fn round_nearest<T: Number>(value: T, nearest: T) -> T {
     T::from_f64(raw)
 }
 
+pub fn power<T: Real>(value: T, power: T) -> T {
+    T::from_f64(value.as_f64().powf(power.as_f64()))
+}
+
+pub fn integer_power<T: Number>(value: T, power: i32) -> T {
+    T::from_f64(value.as_f64().powi(power))
+}
+
 pub fn square<T: Number>(value: T) -> T {
     value * value
 }
@@ -111,5 +119,56 @@ mod tests {
     #[case(0.5, 0.125)]
     fn test_cube(#[case] input: f64, #[case] expected: f64) {
         assert_eq!(cube(input), expected);
+    }
+
+    #[rstest]
+    #[case(1.0, 2, 1.0)]
+    #[case(1.0, 0, 1.0)]
+    #[case(1.0, -1, 1.0)]
+    #[case(3.0, -1, 1.0/3.0)]
+    #[case(3.0, -2, 1.0/9.0)]
+    #[case(3.0, 0, 1.0)]
+    #[case(3.0, 1, 3.0)]
+    #[case(3.0, 2, 9.0)]
+    #[case(0.0, 2, 0.0)]
+    #[case(-2.0, 2, 4.0)]
+    #[case(-2.0, 3, -8.0)]
+    #[case(0.5, 2, 0.25)]
+    #[case(0.5, -2, 4.0)]
+    fn test_integer_power_f32(#[case] value: f32, #[case] power: i32, #[case] expected: f32) {
+        assert_eq!(integer_power(value, power), expected);
+    }
+
+    #[rstest]
+    #[case(1, 2, 1)]
+    #[case(1, 0, 1)]
+    #[case(1, -1, 1)]
+    #[case(3, -1, 0)]
+    #[case(3, -2, 0)]
+    #[case(3, 0, 1)]
+    #[case(3, 1, 3)]
+    #[case(3, 2, 9)]
+    #[case(-2, 2, 4)]
+    #[case(-2, 3, -8)]
+    #[case(0, 3, 0)]
+    fn test_integer_power_i32(#[case] value: i32, #[case] power: i32, #[case] expected: i32) {
+        assert_eq!(integer_power(value, power), expected);
+    }
+
+    #[rstest]
+    #[case(1.0, 1.0, 1.0)]
+    #[case(1.0, 0.0, 1.0)]
+    #[case(2.0, 0.5, 1.4142135623730951)]
+    #[case(4.0, 0.5, 2.0)]
+    #[case(8.0, 1.0/3.0, 2.0)]
+    #[case(2.0, 2.0, 4.0)]
+    #[case(2.0, 3.0, 8.0)]
+    #[case(3.0, 2.0, 9.0)]
+    #[case(4.0, 1.5, 8.0)]
+    #[case(0.5, 2.0, 0.25)]
+    #[case(0.5, -2.0, 4.0)]
+    fn test_power(#[case] base: f64, #[case] exponent: f64, #[case] expected: f64) {
+        let result = power(base, exponent);
+        assert!((result - expected).abs() < 1e-10);
     }
 }
