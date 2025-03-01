@@ -1,7 +1,12 @@
 [package]
-name = "sol"
+name = "trail-sense-sol"
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
+description = "A Rust library for science and math in the real world."
+homepage = "https://github.com/kylecorry31/sol-rust"
+repository = "https://github.com/kylecorry31/sol-rust"
+readme = "README.md"
 
 [dependencies]
 rstest = "0.24.0"

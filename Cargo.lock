@@ -241,15 +241,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sol"
-version = "0.1.0"
-dependencies = [
- "rstest",
- "strum",
- "strum_macros",
-]
-
-[[package]]
 name = "strum"
 version = "0.27.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -294,6 +285,15 @@ dependencies = [
  "indexmap",
  "toml_datetime",
  "winnow",
+]
+
+[[package]]
+name = "trail-sense-sol"
+version = "0.1.0"
+dependencies = [
+ "rstest",
+ "strum",
+ "strum_macros",
 ]
 
 [[package]]
