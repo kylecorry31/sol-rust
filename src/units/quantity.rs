@@ -1,7 +1,9 @@
 pub trait Unit: Copy + Clone + PartialEq + Eq {
+    /// Returns the multiplier to convert the unit to the base unit.
     fn multiplier_to_base(&self) -> f32;
+    /// Returns the offset to convert the unit to the base unit (done before multiplication).
     fn offset_from_base(&self) -> f32 {
-        return 0.0;
+        0.0
     }
 }
 
@@ -12,7 +14,7 @@ pub struct Quantity<U: Unit> {
 }
 
 pub trait Convertable<U: Unit> {
-    /// Converts a quantity's unit to the given unit
+    /// Converts a quantity to the given unit
     fn convert(&self, to: U) -> Self;
 }
 
@@ -48,5 +50,51 @@ impl<U: Unit> std::ops::Mul<Quantity<U>> for f32 {
             amount: self * rhs.amount,
             units: rhs.units,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[derive(Debug, PartialEq, Eq, Clone, Copy)]
+    enum TestUnit {
+        Base,
+    }
+
+    impl Unit for TestUnit {
+        fn multiplier_to_base(&self) -> f32 {
+            return 1.0;
+        }
+    }
+
+    #[test]
+    fn test_quantity_mul_f32() {
+        let q = Quantity {
+            amount: 10.0,
+            units: TestUnit::Base,
+        };
+        assert_eq!(
+            q * 2.0,
+            Quantity {
+                amount: 20.0,
+                units: TestUnit::Base,
+            }
+        );
+    }
+
+    #[test]
+    fn test_f32_mul_quantity() {
+        let q = Quantity {
+            amount: 10.0,
+            units: TestUnit::Base,
+        };
+        assert_eq!(
+            2.0 * q,
+            Quantity {
+                amount: 20.0,
+                units: TestUnit::Base,
+            }
+        );
     }
 }
