@@ -7,6 +7,7 @@ description = "A Rust library for science and math in the real world."
 homepage = "https://github.com/kylecorry31/sol-rust"
 repository = "https://github.com/kylecorry31/sol-rust"
 readme = "README.md"
+include = ["**/*.rs", "Cargo.toml"]
 
 [dependencies]
 rstest = "0.24.0"
