@@ -2,15 +2,15 @@ use super::quantity::Unit;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Distance {
-    Meters,
-    Millimeters,
-    Centimeters,
-    Kilometers,
-    Inches,
-    Feet,
-    Yards,
-    Miles,
-    NauticalMiles,
+    Centimeters = 1,
+    Inches = 2,
+    Miles = 3,
+    Yards = 4,
+    Feet = 5,
+    Kilometers = 6,
+    Meters = 7,
+    NauticalMiles = 8,
+    Millimeters = 9,
 }
 
 impl Unit for Distance {

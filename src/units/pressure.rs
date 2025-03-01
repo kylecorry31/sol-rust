@@ -2,14 +2,14 @@ use super::quantity::Unit;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Pressure {
-    Hectopascals,
-    Pascals,
-    Bars,
-    Millibars,
-    InchesHg,
-    PoundsPerSquareInch,
-    MillimetersHg,
-    Atmospheres,
+    Hectopascals = 1,
+    Millibars = 2,
+    InchesHg = 3,
+    PoundsPerSquareInch = 4,
+    MillimetersHg = 5,
+    Pascals = 6,
+    Bars = 7,
+    Atmospheres = 8,
 }
 
 impl Unit for Pressure {
