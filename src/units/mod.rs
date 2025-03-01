@@ -1,4 +1,5 @@
 pub mod bearing;
+pub mod coordinate;
 pub mod distance;
 pub mod pressure;
 pub mod quantity;

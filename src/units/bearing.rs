@@ -29,7 +29,7 @@ impl CompassDirection {
 }
 
 pub struct Bearing {
-    value: f32,
+    pub degrees: f32,
 }
 
 impl Bearing {
@@ -40,22 +40,24 @@ impl Bearing {
             normalize_angle(value)
         };
 
-        Bearing { value: normalized }
+        Bearing {
+            degrees: normalized,
+        }
     }
 
     pub fn direction(&self) -> CompassDirection {
-        let a = ((self.value / 45.0).round() * 45.0) % 360.0;
+        let a = ((self.degrees / 45.0).round() * 45.0) % 360.0;
         CompassDirection::iter()
             .find(|d| a == d.azimuth())
             .unwrap_or(CompassDirection::North)
     }
 
     pub fn with_declination(&self, declination: f32) -> Bearing {
-        Bearing::new(self.value + declination)
+        Bearing::new(self.degrees + declination)
     }
 
     pub fn inverse(&self) -> Bearing {
-        Bearing::new(self.value + 180.0)
+        Bearing::new(self.degrees + 180.0)
     }
 
     pub fn from(direction: CompassDirection) -> Bearing {
@@ -105,10 +107,10 @@ mod tests {
         for direction in CompassDirection::iter() {
             let bearing = Bearing::from(direction);
             assert!(
-                (direction.azimuth() - bearing.value).abs() < 0.01,
+                (direction.azimuth() - bearing.degrees).abs() < 0.01,
                 "values not equal - expected: {}, actual: {}",
                 direction.azimuth(),
-                bearing.value
+                bearing.degrees
             );
         }
     }
@@ -127,10 +129,10 @@ mod tests {
     fn test_value(#[case] azimuth: f32, #[case] expected: f32) {
         let bearing = Bearing::new(azimuth);
         assert!(
-            (expected - bearing.value).abs() < 0.01,
+            (expected - bearing.degrees).abs() < 0.01,
             "values not equal - expected: {}, actual: {}",
             expected,
-            bearing.value
+            bearing.degrees
         );
     }
 
@@ -142,10 +144,10 @@ mod tests {
     fn test_inverse(#[case] azimuth: f32, #[case] expected: f32) {
         let bearing = Bearing::new(azimuth);
         assert!(
-            (expected - bearing.inverse().value).abs() < 0.01,
+            (expected - bearing.inverse().degrees).abs() < 0.01,
             "values not equal - expected: {}, actual: {}",
             expected,
-            bearing.inverse().value
+            bearing.inverse().degrees
         );
     }
 
@@ -154,10 +156,10 @@ mod tests {
         let bearing = Bearing::new(45.0);
         let dec = bearing.with_declination(-10.0);
         assert!(
-            (35.0 - dec.value).abs() < 0.01,
+            (35.0 - dec.degrees).abs() < 0.01,
             "values not equal - expected: {}, actual: {}",
             35.0,
-            dec.value
+            dec.degrees
         );
     }
 }
