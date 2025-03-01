@@ -1,5 +1,8 @@
 pub trait Unit: Copy + Clone + PartialEq + Eq {
     fn multiplier_to_base(&self) -> f32;
+    fn offset_from_base(&self) -> f32 {
+        return 0.0;
+    }
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -15,8 +18,9 @@ pub trait Convertable<U: Unit> {
 
 impl<U: Unit> Convertable<U> for Quantity<U> {
     fn convert(&self, to: U) -> Self {
-        let base_amount = self.amount * self.units.multiplier_to_base();
-        let new_amount = base_amount / to.multiplier_to_base();
+        let base_amount =
+            (self.amount + self.units.offset_from_base()) * self.units.multiplier_to_base();
+        let new_amount = (base_amount / to.multiplier_to_base()) - to.offset_from_base();
         Quantity {
             amount: new_amount,
             units: to,
