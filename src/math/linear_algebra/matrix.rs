@@ -1,4 +1,7 @@
-use super::{RawTensor, Tensor, Vector, dot};
+use super::{
+    RawTensor, Tensor, Vector, adjugate, aggregate, aggregate_columns, aggregate_rows, combine,
+    determinant, dot, inverse, magnitude, map, transpose,
+};
 
 pub struct Matrix {
     pub rows: usize,
@@ -73,6 +76,58 @@ impl Matrix {
 
     pub fn dot<T: Tensor>(&self, other: &T) -> Matrix {
         Matrix::from(dot(self.get_tensor(), other.get_tensor()))
+    }
+
+    pub fn magnitude(&self) -> f32 {
+        magnitude(self.get_tensor())
+    }
+
+    pub fn transpose(&self) -> Matrix {
+        Matrix::from(transpose(self.get_tensor()))
+    }
+
+    pub fn map(&self, operation: impl Fn(f32) -> f32) -> Matrix {
+        Matrix::from(map(self.get_tensor(), operation))
+    }
+
+    pub fn combine<T: Tensor>(&self, other: &T, operation: impl Fn(f32, f32) -> f32) -> Matrix {
+        Matrix::from(combine(self.get_tensor(), other.get_tensor(), operation))
+    }
+
+    pub fn aggregate(&self, initial_value: f32, operation: impl Fn(f32, f32) -> f32) -> f32 {
+        aggregate(self.get_tensor(), initial_value, operation)
+    }
+
+    pub fn aggregate_rows(
+        &self,
+        initial_value: f32,
+        operation: impl Fn(f32, f32) -> f32,
+    ) -> Matrix {
+        Matrix::from(aggregate_rows(self.get_tensor(), initial_value, operation))
+    }
+
+    pub fn aggregate_columns(
+        &self,
+        initial_value: f32,
+        operation: impl Fn(f32, f32) -> f32,
+    ) -> Matrix {
+        Matrix::from(aggregate_columns(
+            self.get_tensor(),
+            initial_value,
+            operation,
+        ))
+    }
+
+    pub fn inverse(&self) -> Matrix {
+        Matrix::from(inverse(self.get_tensor()))
+    }
+
+    pub fn adjugate(&self) -> Matrix {
+        Matrix::from(adjugate(self.get_tensor()))
+    }
+
+    pub fn determinant(&self) -> f32 {
+        determinant(self.get_tensor())
     }
 }
 

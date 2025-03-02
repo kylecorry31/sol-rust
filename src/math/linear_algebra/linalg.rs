@@ -52,10 +52,6 @@ pub fn subtract(tensor1: &RawTensor, tensor2: &RawTensor) -> RawTensor {
     combine(tensor1, tensor2, |x1, x2| x1 - x2)
 }
 
-pub fn cross(tensor1: &RawTensor, tensor2: &RawTensor) -> RawTensor {
-    combine(tensor1, tensor2, |x1, x2| x1 * x2)
-}
-
 pub fn magnitude(tensor: &RawTensor) -> f32 {
     // Using f64 to retain intermediate precision
     let mut sum: f64 = 0.0;
@@ -88,7 +84,7 @@ pub fn transpose(tensor: &RawTensor) -> RawTensor {
 }
 
 pub fn multiply(tensor1: &RawTensor, tensor2: &RawTensor) -> RawTensor {
-    cross(tensor1, tensor2)
+    combine(tensor1, tensor2, |x1, x2| x1 * x2)
 }
 
 pub fn divide(tensor1: &RawTensor, tensor2: &RawTensor) -> RawTensor {
@@ -413,19 +409,6 @@ mod tests {
         #[case] expected: RawTensor,
     ) {
         assert_tensor_eq!(subtract(tensor1, tensor2), expected);
-    }
-
-    #[rstest]
-    #[case(&vec![vec![42.0]], &vec![vec![2.0]], vec![vec![84.0]])]
-    #[case(&vec![vec![1.0], vec![2.0]], &vec![vec![3.0], vec![4.0]], vec![vec![3.0], vec![8.0]])]
-    #[case(&vec![vec![1.0, 2.0], vec![3.0, 4.0]], &vec![vec![5.0, 6.0], vec![7.0, 8.0]], vec![vec![5.0, 12.0], vec![21.0, 32.0]])]
-    #[case(&vec![vec![]], &vec![vec![]], vec![vec![]])]
-    fn test_cross(
-        #[case] tensor1: &RawTensor,
-        #[case] tensor2: &RawTensor,
-        #[case] expected: RawTensor,
-    ) {
-        assert_tensor_eq!(cross(tensor1, tensor2), expected);
     }
 
     #[rstest]
