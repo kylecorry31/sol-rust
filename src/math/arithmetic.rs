@@ -1,35 +1,33 @@
-use super::numbers::{Number, Real};
+use super::utils::is_approximately_zero;
 
-pub fn round_places<T: Real>(value: T, places: i32) -> T {
+pub fn round_places(value: f64, places: i32) -> f64 {
     let power = 10.0_f64.powi(places);
-    let value_f64 = value.as_f64();
-    T::from_f64((value_f64 * power).round() / power)
+    (value * power).round() / power
 }
 
-pub fn round_nearest<T: Number>(value: T, nearest: T) -> T {
-    let raw = (value.as_f64() / nearest.as_f64()).round() * nearest.as_f64();
-    T::from_f64(raw)
+pub fn round_nearest(value: f64, nearest: f64) -> f64 {
+    (value / nearest).round() * nearest
 }
 
-pub fn power<T: Real>(value: T, power: T) -> T {
-    T::from_f64(value.as_f64().powf(power.as_f64()))
+pub fn power(value: f64, power: f64) -> f64 {
+    value.powf(power)
 }
 
-pub fn integer_power<T: Number>(value: T, power: i32) -> T {
-    T::from_f64(value.as_f64().powi(power))
+pub fn integer_power(value: f64, power: i32) -> f64 {
+    value.powi(power)
 }
 
-pub fn square<T: Number>(value: T) -> T {
+pub fn square(value: f64) -> f64 {
     value * value
 }
 
-pub fn cube<T: Number>(value: T) -> T {
+pub fn cube(value: f64) -> f64 {
     value * value * value
 }
 
-pub fn greatest_common_divisor<T: Number>(a: T, b: T, precision: Option<T>) -> T {
+pub fn greatest_common_divisor(a: f64, b: f64, precision: Option<f64>) -> f64 {
     let max_iterations = 1000;
-    let precision = precision.unwrap_or(T::from_f64(0.0001));
+    let precision = precision.unwrap_or(0.0001);
     let mut current_a = a;
     let mut current_b = b;
     let mut iterations = 0;
@@ -44,9 +42,9 @@ pub fn greatest_common_divisor<T: Number>(a: T, b: T, precision: Option<T>) -> T
     current_a
 }
 
-pub fn least_common_multiple<T: Number>(a: T, b: T) -> T {
-    if a == T::from_i32(0) || b == T::from_i32(0) {
-        return T::from_i32(0);
+pub fn least_common_multiple(a: f64, b: f64) -> f64 {
+    if is_approximately_zero(a) || is_approximately_zero(b) {
+        return 0.0;
     }
     a.abs() * (b.abs() / greatest_common_divisor(a, b, None))
 }
@@ -102,22 +100,7 @@ mod tests {
     #[case(-1.0, 1.0, -1.0)]
     #[case(-1.5, 1.0, -2.0)]
     #[case(-1.6, 1.0, -2.0)]
-    fn test_round_nearest_float(#[case] input: f32, #[case] nearest: f32, #[case] expected: f32) {
-        assert_eq!(round_nearest(input, nearest), expected);
-    }
-
-    #[rstest]
-    #[case(1, 1, 1)]
-    #[case(2, 1, 2)]
-    #[case(0, 2, 0)]
-    #[case(3, 2, 4)]
-    #[case(20, 10, 20)]
-    #[case(20, 16, 16)]
-    #[case(25, 16, 32)]
-    #[case(-1, 1, -1)]
-    #[case(-2, 5, 0)]
-    #[case(-3, 5, -5)]
-    fn test_round_nearest_int(#[case] input: i32, #[case] nearest: i32, #[case] expected: i32) {
+    fn test_round_nearest_float(#[case] input: f64, #[case] nearest: f64, #[case] expected: f64) {
         assert_eq!(round_nearest(input, nearest), expected);
     }
 
@@ -159,23 +142,7 @@ mod tests {
     #[case(-2.0, 3, -8.0)]
     #[case(0.5, 2, 0.25)]
     #[case(0.5, -2, 4.0)]
-    fn test_integer_power_f32(#[case] value: f32, #[case] power: i32, #[case] expected: f32) {
-        assert_eq!(integer_power(value, power), expected);
-    }
-
-    #[rstest]
-    #[case(1, 2, 1)]
-    #[case(1, 0, 1)]
-    #[case(1, -1, 1)]
-    #[case(3, -1, 0)]
-    #[case(3, -2, 0)]
-    #[case(3, 0, 1)]
-    #[case(3, 1, 3)]
-    #[case(3, 2, 9)]
-    #[case(-2, 2, 4)]
-    #[case(-2, 3, -8)]
-    #[case(0, 3, 0)]
-    fn test_integer_power_i32(#[case] value: i32, #[case] power: i32, #[case] expected: i32) {
+    fn test_integer_power_f64(#[case] value: f64, #[case] power: i32, #[case] expected: f64) {
         assert_eq!(integer_power(value, power), expected);
     }
 
@@ -212,19 +179,6 @@ mod tests {
             expected,
             result
         );
-    }
-
-    #[rstest]
-    #[case(1, 1, 1)]
-    #[case(100, 200, 100)]
-    #[case(200, 100, 100)]
-    #[case(0, 0, 0)]
-    #[case(0, 1, 1)]
-    #[case(1, 0, 1)]
-    #[case(-1, 1, 1)]
-    #[case(400, 600, 200)]
-    fn test_greatest_common_divisor_int(#[case] a: i32, #[case] b: i32, #[case] expected: i32) {
-        assert_eq!(greatest_common_divisor(a, b, None), expected);
     }
 
     #[rstest]

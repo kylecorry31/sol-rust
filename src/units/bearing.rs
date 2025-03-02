@@ -22,7 +22,7 @@ const ALL_COMPASS_DIRECTIONS: [CompassDirection; 8] = [
 ];
 
 impl CompassDirection {
-    fn azimuth(&self) -> f32 {
+    fn azimuth(&self) -> f64 {
         match self {
             CompassDirection::North => 0.0,
             CompassDirection::NorthEast => 45.0,
@@ -37,11 +37,11 @@ impl CompassDirection {
 }
 
 pub struct Bearing {
-    pub degrees: f32,
+    pub degrees: f64,
 }
 
 impl Bearing {
-    pub fn new(value: f32) -> Self {
+    pub fn new(value: f64) -> Self {
         let normalized = if value.is_nan() || !value.is_finite() {
             0.0
         } else {
@@ -61,7 +61,7 @@ impl Bearing {
             .unwrap_or(&CompassDirection::North)
     }
 
-    pub fn with_declination(&self, declination: f32) -> Bearing {
+    pub fn with_declination(&self, declination: f64) -> Bearing {
         Bearing::new(self.degrees + declination)
     }
 
@@ -73,7 +73,7 @@ impl Bearing {
         Bearing::new(direction.azimuth())
     }
 
-    pub fn get_bearing(degrees: f32) -> f32 {
+    pub fn get_bearing(degrees: f64) -> f64 {
         if degrees.is_nan() || !degrees.is_finite() {
             0.0
         } else {
@@ -83,7 +83,7 @@ impl Bearing {
 }
 
 // TODO: Extract to math
-fn normalize_angle(angle: f32) -> f32 {
+fn normalize_angle(angle: f64) -> f64 {
     ((angle % 360.0) + 360.0) % 360.0
 }
 
@@ -103,10 +103,10 @@ mod tests {
     #[case(315.0, CompassDirection::NorthWest)]
     #[case(10.0, CompassDirection::North)]
     #[case(350.0, CompassDirection::North)]
-    #[case(f32::NAN, CompassDirection::North)]
-    #[case(f32::NEG_INFINITY, CompassDirection::North)]
-    #[case(f32::INFINITY, CompassDirection::North)]
-    fn test_direction(#[case] azimuth: f32, #[case] expected: CompassDirection) {
+    #[case(f64::NAN, CompassDirection::North)]
+    #[case(f64::NEG_INFINITY, CompassDirection::North)]
+    #[case(f64::INFINITY, CompassDirection::North)]
+    fn test_direction(#[case] azimuth: f64, #[case] expected: CompassDirection) {
         let bearing = Bearing::new(azimuth);
         assert_eq!(expected, bearing.direction());
     }
@@ -132,10 +132,10 @@ mod tests {
     #[case(710.0, 350.0)]
     #[case(360.0, 0.0)]
     #[case(-710.0, 10.0)]
-    #[case(f32::NAN, 0.0)]
-    #[case(f32::NEG_INFINITY, 0.0)]
-    #[case(f32::INFINITY, 0.0)]
-    fn test_value(#[case] azimuth: f32, #[case] expected: f32) {
+    #[case(f64::NAN, 0.0)]
+    #[case(f64::NEG_INFINITY, 0.0)]
+    #[case(f64::INFINITY, 0.0)]
+    fn test_value(#[case] azimuth: f64, #[case] expected: f64) {
         let bearing = Bearing::new(azimuth);
         assert!(
             (expected - bearing.degrees).abs() < 0.01,
@@ -150,7 +150,7 @@ mod tests {
     #[case(180.0, 0.0)]
     #[case(90.0, 270.0)]
     #[case(270.0, 90.0)]
-    fn test_inverse(#[case] azimuth: f32, #[case] expected: f32) {
+    fn test_inverse(#[case] azimuth: f64, #[case] expected: f64) {
         let bearing = Bearing::new(azimuth);
         assert!(
             (expected - bearing.inverse().degrees).abs() < 0.01,

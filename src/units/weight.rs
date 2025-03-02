@@ -9,7 +9,7 @@ pub enum Weight {
 }
 
 impl Unit for Weight {
-    fn multiplier_to_base(&self) -> f32 {
+    fn multiplier_to_base(&self) -> f64 {
         match self {
             Weight::Pounds => 453.592,
             Weight::Ounces => 28.3495,
@@ -33,10 +33,10 @@ mod tests {
     #[case(4.0, Weight::Ounces, Weight::Pounds, 0.25)]
     #[case(4.0, Weight::Grams, Weight::Ounces, 0.141096)]
     fn can_convert_between_weight_units(
-        #[case] amount: f32,
+        #[case] amount: f64,
         #[case] units: Weight,
         #[case] to_units: Weight,
-        #[case] expected_amount: f32,
+        #[case] expected_amount: f64,
     ) {
         let actual = Quantity { amount, units }.convert(to_units);
         assert!(

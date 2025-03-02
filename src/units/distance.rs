@@ -14,7 +14,7 @@ pub enum Distance {
 }
 
 impl Unit for Distance {
-    fn multiplier_to_base(&self) -> f32 {
+    fn multiplier_to_base(&self) -> f64 {
         match self {
             Distance::Meters => 1.0,
             Distance::Kilometers => 1000.0,
@@ -62,10 +62,10 @@ mod tests {
     #[case(1.0, Distance::Yards, Distance::Feet, 3.0)]
     #[case(1.0, Distance::Miles, Distance::Feet, 5280.0)]
     fn can_convert_between_distance_units(
-        #[case] amount: f32,
+        #[case] amount: f64,
         #[case] units: Distance,
         #[case] to_units: Distance,
-        #[case] expected_amount: f32,
+        #[case] expected_amount: f64,
     ) {
         let actual = Quantity { amount, units }.convert(to_units);
         assert!(

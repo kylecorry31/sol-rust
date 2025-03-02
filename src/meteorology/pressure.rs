@@ -16,61 +16,34 @@ pub fn get_sea_level_pressure(
 
 #[cfg(test)]
 mod tests {
-    use crate::units::distance::Distance;
-
     use super::*;
+    use crate::{assert_approx_eq, units::distance::Distance};
 
-    #[test]
-    fn can_get_sea_level_pressure() {
-        assert_eq!(
-            Quantity {
-                amount: 0.0,
-                units: Pressure::Hectopascals
-            },
-            get_sea_level_pressure(
-                &Quantity {
-                    amount: 0.0,
-                    units: Pressure::Hectopascals
-                },
-                &Quantity {
-                    amount: 0.0,
-                    units: Distance::Meters
-                }
-            )
-        );
+    use rstest::rstest;
 
-        assert_eq!(
-            Quantity {
-                amount: 988.229,
-                units: Pressure::Hectopascals
-            },
-            get_sea_level_pressure(
-                &Quantity {
-                    amount: 1000.0,
-                    units: Pressure::Hectopascals
-                },
-                &Quantity {
-                    amount: -100.0,
-                    units: Distance::Meters
-                }
-            )
-        );
-
-        assert_eq!(
-            Quantity {
-                amount: 1003.56573,
-                units: Pressure::Hectopascals
-            },
-            get_sea_level_pressure(
-                &Quantity {
-                    amount: 980.0,
-                    units: Pressure::Hectopascals
-                },
-                &Quantity {
-                    amount: 200.0,
-                    units: Distance::Meters
-                }
-            )
-        );
+    #[rstest]
+    #[case(
+        Quantity { amount: 0.0, units: Pressure::Hectopascals },
+        Quantity { amount: 0.0, units: Distance::Meters },
+        Quantity { amount: 0.0, units: Pressure::Hectopascals }
+    )]
+    #[case(
+        Quantity { amount: 1000.0, units: Pressure::Hectopascals },
+        Quantity { amount: -100.0, units: Distance::Meters },
+        Quantity { amount: 988.229, units: Pressure::Hectopascals }
+    )]
+    #[case(
+        Quantity { amount: 980.0, units: Pressure::Hectopascals },
+        Quantity { amount: 200.0, units: Distance::Meters },
+        Quantity { amount: 1003.56573, units: Pressure::Hectopascals }
+    )]
+    fn can_get_sea_level_pressure(
+        #[case] pressure: Quantity<Pressure>,
+        #[case] altitude: Quantity<Distance>,
+        #[case] expected: Quantity<Pressure>,
+    ) {
+        let actual = get_sea_level_pressure(&pressure, &altitude);
+        assert_approx_eq!(expected.amount, actual.amount, 0.01);
+        assert_eq!(expected.units, actual.units);
     }
 }

@@ -1,6 +1,4 @@
-use super::numbers::Number;
-
-pub fn clamp<T: PartialOrd>(value: T, min: T, max: T) -> T {
+pub fn clamp(value: f64, min: f64, max: f64) -> f64 {
     if value > max {
         return max;
     }
@@ -10,7 +8,7 @@ pub fn clamp<T: PartialOrd>(value: T, min: T, max: T) -> T {
     value
 }
 
-pub fn wrap<T: Number>(value: T, min: T, max: T) -> T {
+pub fn wrap(value: f64, min: f64, max: f64) -> f64 {
     let range = max - min;
     if value < min {
         return max - (min - value) % range;
@@ -21,7 +19,7 @@ pub fn wrap<T: Number>(value: T, min: T, max: T) -> T {
     value
 }
 
-pub fn lerp<T: Number>(percent: T, start: T, end: T, should_clamp: bool) -> T {
+pub fn lerp(percent: f64, start: f64, end: f64, should_clamp: bool) -> f64 {
     let value = start + (end - start) * percent;
 
     if should_clamp {
@@ -31,30 +29,42 @@ pub fn lerp<T: Number>(percent: T, start: T, end: T, should_clamp: bool) -> T {
     }
 }
 
-pub fn norm<T: Number>(value: T, minimum: T, maximum: T, should_clamp: bool) -> T {
+pub fn norm(value: f64, minimum: f64, maximum: f64, should_clamp: bool) -> f64 {
     let range = maximum - minimum;
-    if range == T::from_i32(0) {
-        return T::from_i32(0);
+    if range == 0.0 {
+        return 0.0;
     }
     let normal = (value - minimum) / range;
 
     if should_clamp {
-        clamp(normal, T::from_i32(0), T::from_i32(1))
+        clamp(normal, 0.0, 1.0)
     } else {
         normal
     }
 }
 
-pub fn map<T: Number>(
-    value: T,
-    original_min: T,
-    original_max: T,
-    new_min: T,
-    new_max: T,
+pub fn map(
+    value: f64,
+    original_min: f64,
+    original_max: f64,
+    new_min: f64,
+    new_max: f64,
     should_clamp: bool,
-) -> T {
+) -> f64 {
     let normal = norm(value, original_min, original_max, should_clamp);
     lerp(normal, new_min, new_max, should_clamp)
+}
+
+pub fn is_approximately_equal(value1: f64, value2: f64, precision: Option<f64>) -> bool {
+    let actual_precision = match precision {
+        Some(precision) => precision,
+        None => f64::EPSILON,
+    };
+    (value1 - value2).abs() <= actual_precision
+}
+
+pub fn is_approximately_zero(value: f64) -> bool {
+    return value.abs() <= f64::EPSILON;
 }
 
 #[cfg(test)]
@@ -71,7 +81,7 @@ mod tests {
     #[case(4.0, 2.0, 5.0, 4.0)]
     #[case(1.0, 2.0, 5.0, 2.0)]
     #[case(6.0, 2.0, 5.0, 5.0)]
-    fn test_clamp(#[case] value: f32, #[case] min: f32, #[case] max: f32, #[case] expected: f32) {
+    fn test_clamp(#[case] value: f64, #[case] min: f64, #[case] max: f64, #[case] expected: f64) {
         assert_eq!(clamp(value, min, max), expected);
     }
 
@@ -89,7 +99,7 @@ mod tests {
     #[case(-1800.0, 0.0, 360.0, 360.0)]
     #[case(1799.0, 0.0, 360.0, 359.0)]
     #[case(-1799.0, 0.0, 360.0, 1.0)]
-    fn test_wrap(#[case] value: f32, #[case] min: f32, #[case] max: f32, #[case] expected: f32) {
+    fn test_wrap(#[case] value: f64, #[case] min: f64, #[case] max: f64, #[case] expected: f64) {
         assert_eq!(wrap(value, min, max), expected);
     }
 
@@ -107,11 +117,11 @@ mod tests {
     #[case(0.5, 0.0, 1.0, true, 0.5)]
     #[case(2.0, 0.0, 1.0, true, 1.0)]
     fn test_norm(
-        #[case] value: f32,
-        #[case] min: f32,
-        #[case] max: f32,
+        #[case] value: f64,
+        #[case] min: f64,
+        #[case] max: f64,
         #[case] should_clamp: bool,
-        #[case] expected: f32,
+        #[case] expected: f64,
     ) {
         assert_eq!(norm(value, min, max, should_clamp), expected);
     }
@@ -130,11 +140,11 @@ mod tests {
     #[case(0.5, 0.0, 1.0, true, 0.5)]
     #[case(2.0, 0.0, 1.0, true, 1.0)]
     fn test_lerp(
-        #[case] percent: f32,
-        #[case] start: f32,
-        #[case] end: f32,
+        #[case] percent: f64,
+        #[case] start: f64,
+        #[case] end: f64,
         #[case] should_clamp: bool,
-        #[case] expected: f32,
+        #[case] expected: f64,
     ) {
         assert_eq!(lerp(percent, start, end, should_clamp), expected);
     }
@@ -153,13 +163,13 @@ mod tests {
     #[case(0.5, 0.0, 1.0, 2.0, 4.0, true, 3.0)]
     #[case(2.0, 0.0, 1.0, 2.0, 4.0, true, 4.0)]
     fn test_map(
-        #[case] value: f32,
-        #[case] original_min: f32,
-        #[case] original_max: f32,
-        #[case] new_min: f32,
-        #[case] new_max: f32,
+        #[case] value: f64,
+        #[case] original_min: f64,
+        #[case] original_max: f64,
+        #[case] new_min: f64,
+        #[case] new_max: f64,
         #[case] should_clamp: bool,
-        #[case] expected: f32,
+        #[case] expected: f64,
     ) {
         assert_eq!(
             map(

@@ -10,7 +10,7 @@ pub enum Time {
 }
 
 impl Unit for Time {
-    fn multiplier_to_base(&self) -> f32 {
+    fn multiplier_to_base(&self) -> f64 {
         match self {
             Time::Milliseconds => 0.001,
             Time::Seconds => 1.0,
@@ -44,10 +44,10 @@ mod tests {
     #[case(1.0, Time::Days, Time::Hours, 24.0)]
     #[case(1.0, Time::Minutes, Time::Milliseconds, 60000.0)]
     fn can_convert_between_time_units(
-        #[case] amount: f32,
+        #[case] amount: f64,
         #[case] units: Time,
         #[case] to_units: Time,
-        #[case] expected_amount: f32,
+        #[case] expected_amount: f64,
     ) {
         let actual = Quantity { amount, units }.convert(to_units);
         assert!(

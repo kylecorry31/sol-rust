@@ -7,14 +7,14 @@ pub enum Temperature {
 }
 
 impl Unit for Temperature {
-    fn multiplier_to_base(&self) -> f32 {
+    fn multiplier_to_base(&self) -> f64 {
         match self {
             Temperature::Fahrenheit => 5.0 / 9.0,
             Temperature::Celsius => 1.0,
         }
     }
 
-    fn offset_from_base(&self) -> f32 {
+    fn offset_from_base(&self) -> f64 {
         match self {
             Temperature::Fahrenheit => -32.0,
             Temperature::Celsius => 0.0,
@@ -40,10 +40,10 @@ mod tests {
     #[case(-40.0, Temperature::Fahrenheit, Temperature::Celsius, -40.0)]
     #[case(-40.0, Temperature::Celsius, Temperature::Fahrenheit, -40.0)]
     fn can_convert_between_temperature_units(
-        #[case] amount: f32,
+        #[case] amount: f64,
         #[case] units: Temperature,
         #[case] to_units: Temperature,
-        #[case] expected_amount: f32,
+        #[case] expected_amount: f64,
     ) {
         let actual = Quantity { amount, units }.convert(to_units);
         assert!(

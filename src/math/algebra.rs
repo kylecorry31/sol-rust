@@ -1,8 +1,6 @@
-use super::numbers::Number;
-
-pub fn polynomial<T: Number>(x: T, coefs: &[T]) -> T {
-    let mut running_total = T::from_i32(0);
-    let mut x_power = T::from_i32(1);
+pub fn polynomial(x: f64, coefs: &[f64]) -> f64 {
+    let mut running_total = 0.0;
+    let mut x_power = 1.0;
     coefs.iter().for_each(|&coef| {
         running_total += x_power * coef;
         x_power *= x;
