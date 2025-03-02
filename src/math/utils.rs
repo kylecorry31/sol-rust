@@ -236,6 +236,7 @@ mod tests {
     #[case(0.799992331, 2, 0.8)]
     #[case(1.234567, 2, 1.234567)]
     #[case(1.234567, 3, 1.234567)]
+    #[case(-0.0, 7, 0.0)]
     fn test_approximate_round(#[case] value: f32, #[case] places: i32, #[case] expected: f32) {
         assert_approx_eq!(expected, approximate_round(value, places));
     }

@@ -11,3 +11,6 @@ include = ["**/*.rs", "Cargo.toml"]
 
 [dependencies]
 rstest = "0.24.0"
+
+[lints.clippy]
+needless_range_loop = "allow"

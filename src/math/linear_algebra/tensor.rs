@@ -1,10 +1,7 @@
-use super::{Matrix, RawTensor, add, apply, cross, divide, dot, multiply, subtract, transpose};
+use super::{Matrix, RawTensor, add, cross, divide, map, multiply, subtract, transpose};
 
 pub trait Tensor {
     fn get_tensor(&self) -> &RawTensor;
-    fn dot<T: Tensor>(&self, other: &T) -> f32 {
-        dot(self.get_tensor(), other.get_tensor())
-    }
     fn cross<T: Tensor>(&self, other: &T) -> Matrix {
         Matrix::from(cross(self.get_tensor(), other.get_tensor()))
     }
@@ -23,8 +20,8 @@ pub trait Tensor {
     fn divide<T: Tensor>(&self, other: &T) -> Matrix {
         Matrix::from(divide(self.get_tensor(), other.get_tensor()))
     }
-    fn apply(&self, operation: impl Fn(f32) -> f32) -> Matrix {
-        Matrix::from(apply(self.get_tensor(), operation))
+    fn map(&self, operation: impl Fn(f32) -> f32) -> Matrix {
+        Matrix::from(map(self.get_tensor(), operation))
     }
     fn value(&self) -> f32 {
         self.get_tensor()[0][0]

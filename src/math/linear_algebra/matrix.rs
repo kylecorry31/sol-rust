@@ -1,4 +1,4 @@
-use super::{RawTensor, Tensor, Vector};
+use super::{RawTensor, Tensor, Vector, dot};
 
 pub struct Matrix {
     pub rows: usize,
@@ -69,6 +69,10 @@ impl Matrix {
                     .unwrap_or(0.0),
             )
         }
+    }
+
+    pub fn dot<T: Tensor>(&self, other: &T) -> Matrix {
+        Matrix::from(dot(self.get_tensor(), other.get_tensor()))
     }
 }
 

@@ -1,4 +1,4 @@
-use super::{RawTensor, Tensor, transpose};
+use super::{Matrix, RawTensor, Tensor, dot, transpose};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Vector {
@@ -35,6 +35,14 @@ impl Vector {
             z: data.get(2).copied().unwrap_or(0.0),
             data: transpose(&vec![data]),
         }
+    }
+
+    pub fn to_matrix(&self) -> Matrix {
+        Matrix::from(self.data.clone())
+    }
+
+    pub fn dot(&self, other: &Vector) -> f32 {
+        dot(self.transpose().get_tensor(), other.get_tensor())[0][0]
     }
 }
 
