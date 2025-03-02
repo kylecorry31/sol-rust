@@ -1,4 +1,4 @@
-pub fn polynomial(x: f64, coefs: &[f64]) -> f64 {
+pub fn polynomial(x: f32, coefs: &[f32]) -> f32 {
     let mut running_total = 0.0;
     let mut x_power = 1.0;
     coefs.iter().for_each(|&coef| {
@@ -22,7 +22,7 @@ mod tests {
     #[case(3.0, &[0.0, 1.0, -3.0, 1.0], 3.0)]
     #[case(3.0, &[], 0.0)]
     #[case(3.0, &[1.0], 1.0)]
-    fn test_polynomial(#[case] x: f64, #[case] coefs: &[f64], #[case] expected: f64) {
+    fn test_polynomial(#[case] x: f32, #[case] coefs: &[f32], #[case] expected: f32) {
         let result = polynomial(x, coefs);
         assert_approx_eq!(expected, result);
     }

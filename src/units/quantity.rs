@@ -1,15 +1,15 @@
 pub trait Unit: Copy + Clone + PartialEq + Eq {
     /// Returns the multiplier to convert the unit to the base unit.
-    fn multiplier_to_base(&self) -> f64;
+    fn multiplier_to_base(&self) -> f32;
     /// Returns the offset to convert the unit to the base unit (done before multiplication).
-    fn offset_from_base(&self) -> f64 {
+    fn offset_from_base(&self) -> f32 {
         0.0
     }
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Quantity<U: Unit> {
-    pub amount: f64,
+    pub amount: f32,
     pub units: U,
 }
 
@@ -31,10 +31,10 @@ impl<U: Unit> Convertable<U> for Quantity<U> {
 }
 
 // Implement multiplication operator for Quantity
-impl<U: Unit> std::ops::Mul<f64> for Quantity<U> {
+impl<U: Unit> std::ops::Mul<f32> for Quantity<U> {
     type Output = Self;
 
-    fn mul(self, rhs: f64) -> Self {
+    fn mul(self, rhs: f32) -> Self {
         Quantity {
             amount: self.amount * rhs,
             units: self.units,
@@ -42,7 +42,7 @@ impl<U: Unit> std::ops::Mul<f64> for Quantity<U> {
     }
 }
 
-impl<U: Unit> std::ops::Mul<Quantity<U>> for f64 {
+impl<U: Unit> std::ops::Mul<Quantity<U>> for f32 {
     type Output = Quantity<U>;
 
     fn mul(self, rhs: Quantity<U>) -> Quantity<U> {
@@ -53,10 +53,10 @@ impl<U: Unit> std::ops::Mul<Quantity<U>> for f64 {
     }
 }
 
-impl<U: Unit> std::ops::Div<f64> for Quantity<U> {
+impl<U: Unit> std::ops::Div<f32> for Quantity<U> {
     type Output = Self;
 
-    fn div(self, rhs: f64) -> Self {
+    fn div(self, rhs: f32) -> Self {
         Quantity {
             amount: self.amount / rhs,
             units: self.units,
@@ -98,13 +98,13 @@ mod tests {
     }
 
     impl Unit for TestUnit {
-        fn multiplier_to_base(&self) -> f64 {
+        fn multiplier_to_base(&self) -> f32 {
             return 1.0;
         }
     }
 
     #[test]
-    fn test_quantity_mul_f64() {
+    fn test_quantity_mul_f32() {
         let q = Quantity {
             amount: 10.0,
             units: TestUnit::Base,
@@ -119,7 +119,7 @@ mod tests {
     }
 
     #[test]
-    fn test_f64_mul_quantity() {
+    fn test_f32_mul_quantity() {
         let q = Quantity {
             amount: 10.0,
             units: TestUnit::Base,
@@ -134,7 +134,7 @@ mod tests {
     }
 
     #[test]
-    fn test_quantity_div_f64() {
+    fn test_quantity_div_f32() {
         let q = Quantity {
             amount: 10.0,
             units: TestUnit::Base,

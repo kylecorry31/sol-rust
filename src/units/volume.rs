@@ -21,7 +21,7 @@ pub enum Volume {
 }
 
 impl Unit for Volume {
-    fn multiplier_to_base(&self) -> f64 {
+    fn multiplier_to_base(&self) -> f32 {
         match self {
             Volume::Liters => 1.0,
             Volume::Milliliter => 0.001,
@@ -64,10 +64,10 @@ mod tests {
     #[case(1.0, Volume::USTablespoons, Volume::USTeaspoons, 3.0)]
     #[case(1.0, Volume::ImperialTablespoons, Volume::ImperialTeaspoons, 3.0)]
     fn can_convert_between_volume_units(
-        #[case] amount: f64,
+        #[case] amount: f32,
         #[case] units: Volume,
         #[case] to_units: Volume,
-        #[case] expected_amount: f64,
+        #[case] expected_amount: f32,
     ) {
         let actual = Quantity { amount, units }.convert(to_units);
         assert!(

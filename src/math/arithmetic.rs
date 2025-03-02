@@ -1,31 +1,31 @@
 use super::utils::is_approximately_zero;
 
-pub fn round_places(value: f64, places: i32) -> f64 {
-    let power = 10.0_f64.powi(places);
+pub fn round_places(value: f32, places: i32) -> f32 {
+    let power = 10.0_f32.powi(places);
     (value * power).round() / power
 }
 
-pub fn round_nearest(value: f64, nearest: f64) -> f64 {
+pub fn round_nearest(value: f32, nearest: f32) -> f32 {
     (value / nearest).round() * nearest
 }
 
-pub fn power(value: f64, power: f64) -> f64 {
+pub fn power(value: f32, power: f32) -> f32 {
     value.powf(power)
 }
 
-pub fn integer_power(value: f64, power: i32) -> f64 {
+pub fn integer_power(value: f32, power: i32) -> f32 {
     value.powi(power)
 }
 
-pub fn square(value: f64) -> f64 {
+pub fn square(value: f32) -> f32 {
     value * value
 }
 
-pub fn cube(value: f64) -> f64 {
+pub fn cube(value: f32) -> f32 {
     value * value * value
 }
 
-pub fn greatest_common_divisor(a: f64, b: f64, precision: Option<f64>) -> f64 {
+pub fn greatest_common_divisor(a: f32, b: f32, precision: Option<f32>) -> f32 {
     let max_iterations = 1000;
     let precision = precision.unwrap_or(0.0001);
     let mut current_a = a;
@@ -42,7 +42,7 @@ pub fn greatest_common_divisor(a: f64, b: f64, precision: Option<f64>) -> f64 {
     current_a
 }
 
-pub fn least_common_multiple(a: f64, b: f64) -> f64 {
+pub fn least_common_multiple(a: f32, b: f32) -> f32 {
     if is_approximately_zero(a) || is_approximately_zero(b) {
         return 0.0;
     }
@@ -87,7 +87,7 @@ mod tests {
     #[case(8000000.0, 5, 8000000.0)]
     #[case(8000000.125555, 5, 8000000.12556)]
     #[case(8000000.125555555555, 8, 8000000.12555556)]
-    fn test_round_places(#[case] input: f64, #[case] places: i32, #[case] expected: f64) {
+    fn test_round_places(#[case] input: f32, #[case] places: i32, #[case] expected: f32) {
         let result = round_places(input, places);
         assert_approx_eq!(expected, result);
     }
@@ -103,7 +103,7 @@ mod tests {
     #[case(-1.0, 1.0, -1.0)]
     #[case(-1.5, 1.0, -2.0)]
     #[case(-1.6, 1.0, -2.0)]
-    fn test_round_nearest_float(#[case] input: f64, #[case] nearest: f64, #[case] expected: f64) {
+    fn test_round_nearest_float(#[case] input: f32, #[case] nearest: f32, #[case] expected: f32) {
         let result = round_nearest(input, nearest);
         assert_approx_eq!(expected, result);
     }
@@ -116,7 +116,7 @@ mod tests {
     #[case(-4.0, 16.0)]
     #[case(0.0, 0.0)]
     #[case(0.5, 0.25)]
-    fn test_square(#[case] input: f64, #[case] expected: f64) {
+    fn test_square(#[case] input: f32, #[case] expected: f32) {
         let result = square(input);
         assert_approx_eq!(expected, result);
     }
@@ -129,7 +129,7 @@ mod tests {
     #[case(-4.0, -64.0)]
     #[case(0.0, 0.0)]
     #[case(0.5, 0.125)]
-    fn test_cube(#[case] input: f64, #[case] expected: f64) {
+    fn test_cube(#[case] input: f32, #[case] expected: f32) {
         let result = cube(input);
         assert_approx_eq!(expected, result);
     }
@@ -148,7 +148,7 @@ mod tests {
     #[case(-2.0, 3, -8.0)]
     #[case(0.5, 2, 0.25)]
     #[case(0.5, -2, 4.0)]
-    fn test_integer_power_f64(#[case] value: f64, #[case] power: i32, #[case] expected: f64) {
+    fn test_integer_power_f32(#[case] value: f32, #[case] power: i32, #[case] expected: f32) {
         let result = integer_power(value, power);
         assert_approx_eq!(expected, result);
     }
@@ -165,7 +165,7 @@ mod tests {
     #[case(4.0, 1.5, 8.0)]
     #[case(0.5, 2.0, 0.25)]
     #[case(0.5, -2.0, 4.0)]
-    fn test_power(#[case] base: f64, #[case] exponent: f64, #[case] expected: f64) {
+    fn test_power(#[case] base: f32, #[case] exponent: f32, #[case] expected: f32) {
         let result = power(base, exponent);
         assert_approx_eq!(expected, result);
     }
@@ -178,7 +178,7 @@ mod tests {
     #[case(0.0, 1.0, 1.0)]
     #[case(1.0, 0.0, 1.0)]
     #[case(0.0, 0.0, 0.0)]
-    fn test_greatest_common_divisor(#[case] a: f64, #[case] b: f64, #[case] expected: f64) {
+    fn test_greatest_common_divisor(#[case] a: f32, #[case] b: f32, #[case] expected: f32) {
         let result = greatest_common_divisor(a, b, None);
         assert_approx_eq!(expected, result);
     }
@@ -191,7 +191,7 @@ mod tests {
     #[case(0.0, 1.0, 0.0)]
     #[case(1.0, 0.0, 0.0)]
     #[case(0.0, 0.0, 0.0)]
-    fn test_least_common_multiple(#[case] a: f64, #[case] b: f64, #[case] expected: f64) {
+    fn test_least_common_multiple(#[case] a: f32, #[case] b: f32, #[case] expected: f32) {
         let result = least_common_multiple(a, b);
         assert_approx_eq!(expected, result);
     }

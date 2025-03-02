@@ -13,7 +13,7 @@ pub enum Pressure {
 }
 
 impl Unit for Pressure {
-    fn multiplier_to_base(&self) -> f64 {
+    fn multiplier_to_base(&self) -> f32 {
         match self {
             Pressure::Pascals => 1.0,
             Pressure::Hectopascals => 100.0,
@@ -58,10 +58,10 @@ mod tests {
     #[case(1.0, Pressure::MillimetersHg, Pressure::InchesHg, 0.0393701)]
     #[case(1.0, Pressure::Atmospheres, Pressure::Bars, 1.01325)]
     fn can_convert_between_pressure_units(
-        #[case] amount: f64,
+        #[case] amount: f32,
         #[case] units: Pressure,
         #[case] to_units: Pressure,
-        #[case] expected_amount: f64,
+        #[case] expected_amount: f32,
     ) {
         let actual = Quantity { amount, units }.convert(to_units);
         assert!(

@@ -2,11 +2,11 @@
 macro_rules! assert_approx_eq {
     ($left:expr, $right:expr) => {
         assert!(
-            ($left - $right).abs() <= 1e-10,
+            ($left - $right).abs() <= 1e-5,
             "assertion failed: `(left ≈ right)`\n  left: `{}`\n right: `{}`\n precision: `{}`",
             $left,
             $right,
-            1e-10
+            1e-5
         );
     };
     ($left:expr, $right:expr, $precision:expr) => {
