@@ -187,4 +187,31 @@ mod tests {
             )
         );
     }
+
+    #[rstest]
+    #[case(0.1, 0.11, Some(0.1), true)]
+    #[case(0.1, 0.11, Some(0.01), true)]
+    #[case(0.1, 0.11, Some(0.001), false)]
+    #[case(0.1, 0.1 + EPSILON / 2.0, None, true)]
+    #[case(0.1, 0.1 + EPSILON * 2.0, None, false)]
+    #[case(10000.0, 10000.0 + EPSILON / 2.0, None, true)]
+    #[case(-0.1, -0.11, Some(0.1), true)]
+    fn test_is_approximately_equal(
+        #[case] value1: f64,
+        #[case] value2: f64,
+        #[case] precision: Option<f64>,
+        #[case] expected: bool,
+    ) {
+        assert_eq!(expected, is_approximately_equal(value1, value2, precision));
+    }
+
+    #[rstest]
+    #[case(0.0, true)]
+    #[case(EPSILON / 2.0, true)]
+    #[case(EPSILON * 2.0, false)]
+    #[case(-EPSILON / 2.0, true)]
+    #[case(-EPSILON * 2.0, false)]
+    fn test_is_approximately_zero(#[case] value: f64, #[case] expected: bool) {
+        assert_eq!(expected, is_approximately_zero(value));
+    }
 }
