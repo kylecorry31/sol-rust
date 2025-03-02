@@ -1,3 +1,5 @@
+pub const EPSILON: f64 = 1e-7;
+
 pub fn clamp(value: f64, min: f64, max: f64) -> f64 {
     if value > max {
         return max;
@@ -58,13 +60,13 @@ pub fn map(
 pub fn is_approximately_equal(value1: f64, value2: f64, precision: Option<f64>) -> bool {
     let actual_precision = match precision {
         Some(precision) => precision,
-        None => f64::EPSILON,
+        None => EPSILON,
     };
     (value1 - value2).abs() <= actual_precision
 }
 
 pub fn is_approximately_zero(value: f64) -> bool {
-    value.abs() <= f64::EPSILON
+    value.abs() <= EPSILON
 }
 
 #[cfg(test)]

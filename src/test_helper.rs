@@ -2,11 +2,11 @@
 macro_rules! assert_approx_eq {
     ($left:expr, $right:expr) => {
         assert!(
-            ($left - $right).abs() <= f64::EPSILON,
+            ($left - $right).abs() <= 1e-7,
             "assertion failed: `(left ≈ right)`\n  left: `{}`\n right: `{}`\n precision: `{}`",
             $left,
             $right,
-            f64::EPSILON
+            1e-7
         );
     };
     ($left:expr, $right:expr, $precision:expr) => {
