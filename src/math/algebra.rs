@@ -24,6 +24,6 @@ mod tests {
     #[case(3.0, &[1.0], 1.0)]
     fn test_polynomial(#[case] x: f64, #[case] coefs: &[f64], #[case] expected: f64) {
         let result = polynomial(x, coefs);
-        assert_approx_eq!(expected, result, 1e-10);
+        assert_approx_eq!(expected, result);
     }
 }

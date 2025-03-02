@@ -1,4 +1,4 @@
-pub const EPSILON: f64 = 1e-7;
+pub const EPSILON: f64 = 1e-10;
 
 pub fn clamp(value: f64, min: f64, max: f64) -> f64 {
     if value > max {
