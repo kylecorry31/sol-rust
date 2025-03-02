@@ -51,6 +51,8 @@ pub fn least_common_multiple(a: f64, b: f64) -> f64 {
 
 #[cfg(test)]
 mod tests {
+    use crate::assert_approx_eq;
+
     use super::*;
     use rstest::rstest;
 
@@ -86,7 +88,8 @@ mod tests {
     #[case(8000000.125555, 5, 8000000.12556)]
     #[case(8000000.125555555555, 8, 8000000.12555556)]
     fn test_round_places(#[case] input: f64, #[case] places: i32, #[case] expected: f64) {
-        assert_eq!(round_places(input, places), expected);
+        let result = round_places(input, places);
+        assert_approx_eq!(expected, result, 1e-10);
     }
 
     #[rstest]
@@ -101,7 +104,8 @@ mod tests {
     #[case(-1.5, 1.0, -2.0)]
     #[case(-1.6, 1.0, -2.0)]
     fn test_round_nearest_float(#[case] input: f64, #[case] nearest: f64, #[case] expected: f64) {
-        assert_eq!(round_nearest(input, nearest), expected);
+        let result = round_nearest(input, nearest);
+        assert_approx_eq!(expected, result, 1e-10);
     }
 
     #[rstest]
@@ -113,7 +117,8 @@ mod tests {
     #[case(0.0, 0.0)]
     #[case(0.5, 0.25)]
     fn test_square(#[case] input: f64, #[case] expected: f64) {
-        assert_eq!(square(input), expected);
+        let result = square(input);
+        assert_approx_eq!(expected, result, 1e-10);
     }
 
     #[rstest]
@@ -125,7 +130,8 @@ mod tests {
     #[case(0.0, 0.0)]
     #[case(0.5, 0.125)]
     fn test_cube(#[case] input: f64, #[case] expected: f64) {
-        assert_eq!(cube(input), expected);
+        let result = cube(input);
+        assert_approx_eq!(expected, result, 1e-10);
     }
 
     #[rstest]
@@ -143,7 +149,8 @@ mod tests {
     #[case(0.5, 2, 0.25)]
     #[case(0.5, -2, 4.0)]
     fn test_integer_power_f64(#[case] value: f64, #[case] power: i32, #[case] expected: f64) {
-        assert_eq!(integer_power(value, power), expected);
+        let result = integer_power(value, power);
+        assert_approx_eq!(expected, result, 1e-10);
     }
 
     #[rstest]
@@ -160,7 +167,7 @@ mod tests {
     #[case(0.5, -2.0, 4.0)]
     fn test_power(#[case] base: f64, #[case] exponent: f64, #[case] expected: f64) {
         let result = power(base, exponent);
-        assert!((result - expected).abs() < 1e-10);
+        assert_approx_eq!(expected, result, 1e-10);
     }
 
     #[rstest]
@@ -173,12 +180,7 @@ mod tests {
     #[case(0.0, 0.0, 0.0)]
     fn test_greatest_common_divisor(#[case] a: f64, #[case] b: f64, #[case] expected: f64) {
         let result = greatest_common_divisor(a, b, None);
-        assert!(
-            (result - expected).abs() < 1e-10,
-            "Expected {} but got {}",
-            expected,
-            result
-        );
+        assert_approx_eq!(expected, result, 1e-10);
     }
 
     #[rstest]
@@ -191,11 +193,6 @@ mod tests {
     #[case(0.0, 0.0, 0.0)]
     fn test_least_common_multiple(#[case] a: f64, #[case] b: f64, #[case] expected: f64) {
         let result = least_common_multiple(a, b);
-        assert!(
-            (result - expected).abs() < 1e-10,
-            "Expected {} but got {}",
-            expected,
-            result
-        );
+        assert_approx_eq!(expected, result, 1e-10);
     }
 }

@@ -64,11 +64,13 @@ pub fn is_approximately_equal(value1: f64, value2: f64, precision: Option<f64>) 
 }
 
 pub fn is_approximately_zero(value: f64) -> bool {
-    return value.abs() <= f64::EPSILON;
+    value.abs() <= f64::EPSILON
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::assert_approx_eq;
+
     use super::*;
     use rstest::rstest;
 
@@ -82,7 +84,7 @@ mod tests {
     #[case(1.0, 2.0, 5.0, 2.0)]
     #[case(6.0, 2.0, 5.0, 5.0)]
     fn test_clamp(#[case] value: f64, #[case] min: f64, #[case] max: f64, #[case] expected: f64) {
-        assert_eq!(clamp(value, min, max), expected);
+        assert_approx_eq!(expected, clamp(value, min, max));
     }
 
     #[rstest]
@@ -100,7 +102,7 @@ mod tests {
     #[case(1799.0, 0.0, 360.0, 359.0)]
     #[case(-1799.0, 0.0, 360.0, 1.0)]
     fn test_wrap(#[case] value: f64, #[case] min: f64, #[case] max: f64, #[case] expected: f64) {
-        assert_eq!(wrap(value, min, max), expected);
+        assert_approx_eq!(expected, wrap(value, min, max));
     }
 
     #[rstest]
@@ -123,7 +125,7 @@ mod tests {
         #[case] should_clamp: bool,
         #[case] expected: f64,
     ) {
-        assert_eq!(norm(value, min, max, should_clamp), expected);
+        assert_approx_eq!(expected, norm(value, min, max, should_clamp));
     }
 
     #[rstest]
@@ -146,7 +148,7 @@ mod tests {
         #[case] should_clamp: bool,
         #[case] expected: f64,
     ) {
-        assert_eq!(lerp(percent, start, end, should_clamp), expected);
+        assert_approx_eq!(expected, lerp(percent, start, end, should_clamp));
     }
 
     #[rstest]
@@ -171,7 +173,8 @@ mod tests {
         #[case] should_clamp: bool,
         #[case] expected: f64,
     ) {
-        assert_eq!(
+        assert_approx_eq!(
+            expected,
             map(
                 value,
                 original_min,
@@ -179,8 +182,7 @@ mod tests {
                 new_min,
                 new_max,
                 should_clamp
-            ),
-            expected
+            )
         );
     }
 }
