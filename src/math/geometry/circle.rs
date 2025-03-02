@@ -18,6 +18,11 @@ impl Shape2D for Circle {
     fn vertex_count(&self) -> usize {
         0
     }
+
+    fn contains(&self, point: &Point2D) -> bool {
+        let distance = self.center.distance(point);
+        distance <= self.radius.powi(2)
+    }
 }
 
 impl Translate2D for Circle {
@@ -93,5 +98,26 @@ mod tests {
             radius: 1.0,
         };
         assert_eq!(circle.vertex_count(), 0);
+    }
+
+    #[rstest]
+    #[case(0.0, 0.0, 1.0, 0.0, 0.0, true)] // Point at center
+    #[case(0.0, 0.0, 1.0, 1.0, 0.0, true)] // Point on edge
+    #[case(0.0, 0.0, 2.0, 1.0, 1.0, true)] // Point inside
+    #[case(0.0, 0.0, 1.0, 2.0, 2.0, false)] // Point outside
+    fn test_circle_contains(
+        #[case] cx: f32,
+        #[case] cy: f32,
+        #[case] r: f32,
+        #[case] px: f32,
+        #[case] py: f32,
+        #[case] expected: bool,
+    ) {
+        let circle = Circle {
+            center: Point2D::new(cx, cy),
+            radius: r,
+        };
+        let point = Point2D::new(px, py);
+        assert_eq!(circle.contains(&point), expected);
     }
 }
