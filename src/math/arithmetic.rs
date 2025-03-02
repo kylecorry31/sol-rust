@@ -79,6 +79,14 @@ pub fn is_decreasing(arr: &[f32]) -> bool {
     has_lesser
 }
 
+pub fn factorial(n: u32) -> u32 {
+    let mut result = 1;
+    for i in 1..=n {
+        result *= i;
+    }
+    result
+}
+
 #[cfg(test)]
 mod tests {
     use crate::assert_approx_eq;
@@ -249,6 +257,20 @@ mod tests {
     #[case(&[], false)]
     fn test_is_decreasing(#[case] arr: &[f32], #[case] expected: bool) {
         let result = is_decreasing(arr);
+        assert_eq!(expected, result);
+    }
+
+    #[rstest]
+    #[case(0, 1)]
+    #[case(1, 1)]
+    #[case(2, 2)]
+    #[case(3, 6)]
+    #[case(4, 24)]
+    #[case(5, 120)]
+    #[case(6, 720)]
+    #[case(7, 5040)]
+    fn test_factorial(#[case] input: u32, #[case] expected: u32) {
+        let result = factorial(input);
         assert_eq!(expected, result);
     }
 }
