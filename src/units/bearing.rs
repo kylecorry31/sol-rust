@@ -1,7 +1,4 @@
-use strum::IntoEnumIterator;
-use strum_macros::EnumIter;
-
-#[derive(Debug, Eq, PartialEq, Copy, Clone, EnumIter)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone)]
 pub enum CompassDirection {
     North,
     NorthEast,
@@ -12,6 +9,17 @@ pub enum CompassDirection {
     West,
     NorthWest,
 }
+
+const ALL_COMPASS_DIRECTIONS: [CompassDirection; 8] = [
+    CompassDirection::North,
+    CompassDirection::NorthEast,
+    CompassDirection::East,
+    CompassDirection::SouthEast,
+    CompassDirection::South,
+    CompassDirection::SouthWest,
+    CompassDirection::West,
+    CompassDirection::NorthWest,
+];
 
 impl CompassDirection {
     fn azimuth(&self) -> f32 {
@@ -47,9 +55,10 @@ impl Bearing {
 
     pub fn direction(&self) -> CompassDirection {
         let a = ((self.degrees / 45.0).round() * 45.0) % 360.0;
-        CompassDirection::iter()
+        *ALL_COMPASS_DIRECTIONS
+            .iter()
             .find(|d| a == d.azimuth())
-            .unwrap_or(CompassDirection::North)
+            .unwrap_or(&CompassDirection::North)
     }
 
     pub fn with_declination(&self, declination: f32) -> Bearing {
@@ -104,7 +113,7 @@ mod tests {
 
     #[test]
     fn test_from() {
-        for direction in CompassDirection::iter() {
+        for direction in ALL_COMPASS_DIRECTIONS {
             let bearing = Bearing::from(direction);
             assert!(
                 (direction.azimuth() - bearing.degrees).abs() < 0.01,

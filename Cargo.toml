@@ -11,5 +11,3 @@ include = ["**/*.rs", "Cargo.toml"]
 
 [dependencies]
 rstest = "0.24.0"
-strum = "0.27.1"
-strum_macros = "0.27.1"
