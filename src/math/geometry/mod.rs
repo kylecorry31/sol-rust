@@ -1,5 +1,6 @@
 mod circle;
 mod distance;
+mod intersections;
 mod line;
 mod point;
 mod polygon;
@@ -8,6 +9,7 @@ mod transform;
 
 pub use self::circle::*;
 pub use self::distance::*;
+pub use self::intersections::*;
 pub use self::line::*;
 pub use self::point::*;
 pub use self::polygon::*;
