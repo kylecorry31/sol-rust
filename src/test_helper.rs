@@ -19,3 +19,16 @@ macro_rules! assert_approx_eq {
         );
     };
 }
+
+#[macro_export]
+macro_rules! assert_tensor_eq {
+    ($left:expr, $right:expr) => {
+        assert_eq!($left.len(), $right.len());
+        for (row1, row2) in $left.iter().zip($right.iter()) {
+            assert_eq!(row1.len(), row2.len());
+            for (elem1, elem2) in row1.iter().zip(row2.iter()) {
+                assert_approx_eq!(elem1, elem2);
+            }
+        }
+    };
+}

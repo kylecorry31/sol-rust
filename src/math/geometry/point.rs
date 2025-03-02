@@ -1,4 +1,4 @@
-use crate::math::linear_algebra::Vector2D;
+use crate::math::linear_algebra::Vector;
 
 use super::{Translate2D, euclidean_distance};
 
@@ -23,10 +23,10 @@ impl Point2D {
 }
 
 impl std::ops::Sub for Point2D {
-    type Output = Vector2D;
+    type Output = Vector;
 
     fn sub(self, other: Self) -> Self::Output {
-        Vector2D::new(self.x - other.x, self.y - other.y)
+        Vector::new_2d(self.x - other.x, self.y - other.y)
     }
 }
 

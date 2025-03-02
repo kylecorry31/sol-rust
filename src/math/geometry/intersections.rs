@@ -1,4 +1,7 @@
-use crate::math::{algebra::solve_quadratic, arithmetic::square, utils::is_approximately_zero};
+use crate::math::{
+    algebra::solve_quadratic, arithmetic::square, linear_algebra::Tensor,
+    utils::is_approximately_zero,
+};
 
 use super::{Circle, Line, Point2D, Polygon};
 
