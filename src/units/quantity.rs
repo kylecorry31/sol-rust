@@ -13,6 +13,12 @@ pub struct Quantity<U: Unit> {
     pub units: U,
 }
 
+impl<U: Unit> Quantity<U> {
+    pub fn new(amount: f32, units: U) -> Self {
+        Self { amount, units }
+    }
+}
+
 pub trait Convertable<U: Unit> {
     /// Converts a quantity to the given unit
     fn convert(&self, to: U) -> Self;

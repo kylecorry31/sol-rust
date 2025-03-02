@@ -1,3 +1,4 @@
+pub mod angle;
 pub mod bearing;
 pub mod coordinate;
 pub mod distance;
