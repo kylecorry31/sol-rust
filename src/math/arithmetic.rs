@@ -49,6 +49,36 @@ pub fn least_common_multiple(a: f32, b: f32) -> f32 {
     a.abs() * (b.abs() / greatest_common_divisor(a, b, None))
 }
 
+pub fn is_increasing(arr: &[f32]) -> bool {
+    let mut has_greater = false;
+
+    for i in 1..arr.len() {
+        if arr[i] < arr[i - 1] {
+            return false;
+        }
+
+        if arr[i] > arr[i - 1] {
+            has_greater = true;
+        }
+    }
+    has_greater
+}
+
+pub fn is_decreasing(arr: &[f32]) -> bool {
+    let mut has_lesser = false;
+
+    for i in 1..arr.len() {
+        if arr[i] > arr[i - 1] {
+            return false;
+        }
+
+        if arr[i] < arr[i - 1] {
+            has_lesser = true;
+        }
+    }
+    has_lesser
+}
+
 #[cfg(test)]
 mod tests {
     use crate::assert_approx_eq;
@@ -194,5 +224,31 @@ mod tests {
     fn test_least_common_multiple(#[case] a: f32, #[case] b: f32, #[case] expected: f32) {
         let result = least_common_multiple(a, b);
         assert_approx_eq!(expected, result);
+    }
+
+    #[rstest]
+    #[case(&[1.0, 2.0, 3.0], true)]
+    #[case(&[2.0, 2.0, 2.0, 3.0], true)]
+    #[case(&[1.0, 1.0, 1.0], false)]
+    #[case(&[1.0, 2.0, 1.9], false)]
+    #[case(&[3.0, 2.0, 1.0], false)]
+    #[case(&[1.0], false)]
+    #[case(&[], false)]
+    fn test_is_increasing(#[case] arr: &[f32], #[case] expected: bool) {
+        let result = is_increasing(arr);
+        assert_eq!(expected, result);
+    }
+
+    #[rstest]
+    #[case(&[3.0, 2.0, 1.0], true)]
+    #[case(&[2.0, 2.0, 2.0, 1.0], true)]
+    #[case(&[1.0, 1.0, 1.0], false)]
+    #[case(&[1.0, 0.0, 0.1], false)]
+    #[case(&[1.0, 2.0, 3.0], false)]
+    #[case(&[1.0], false)]
+    #[case(&[], false)]
+    fn test_is_decreasing(#[case] arr: &[f32], #[case] expected: bool) {
+        let result = is_decreasing(arr);
+        assert_eq!(expected, result);
     }
 }
