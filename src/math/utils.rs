@@ -1,3 +1,5 @@
+use super::arithmetic::round_places;
+
 pub const EPSILON: f32 = 1e-5;
 
 pub fn clamp(value: f32, min: f32, max: f32) -> f32 {
@@ -67,6 +69,17 @@ pub fn is_approximately_equal(value1: f32, value2: f32, precision: Option<f32>) 
 
 pub fn is_approximately_zero(value: f32) -> bool {
     value.abs() <= EPSILON
+}
+
+/// This will round to the desired number of places if the value is approximately equal at 2 places below the desired. This can be used to correct floating point errors.
+pub fn approximate_round(value: f32, desired_places: i32) -> f32 {
+    let rounded = round_places(value, desired_places);
+    let extra_rounded = round_places(value, desired_places + 2);
+    if is_approximately_equal(extra_rounded, rounded, None) {
+        rounded
+    } else {
+        value
+    }
 }
 
 #[cfg(test)]
@@ -213,5 +226,17 @@ mod tests {
     #[case(-EPSILON * 2.0, false)]
     fn test_is_approximately_zero(#[case] value: f32, #[case] expected: bool) {
         assert_eq!(expected, is_approximately_zero(value));
+    }
+
+    #[rstest]
+    #[case(0.700000000000000001, 2, 0.7)]
+    #[case(0.700000000000000001, 1, 0.7)]
+    #[case(0.799999999999999999, 1, 0.8)]
+    #[case(0.799999999999999999, 2, 0.8)]
+    #[case(0.799992331, 2, 0.8)]
+    #[case(1.234567, 2, 1.234567)]
+    #[case(1.234567, 3, 1.234567)]
+    fn test_approximate_round(#[case] value: f32, #[case] places: i32, #[case] expected: f32) {
+        assert_approx_eq!(expected, approximate_round(value, places));
     }
 }

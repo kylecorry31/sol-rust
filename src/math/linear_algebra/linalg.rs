@@ -117,15 +117,15 @@ pub fn divide(tensor1: &RawTensor, tensor2: &RawTensor) -> RawTensor {
     result
 }
 
-pub fn scale(tensor: &RawTensor, scalar: f32) -> RawTensor {
+pub fn apply(tensor: &RawTensor, operation: impl Fn(f32) -> f32) -> RawTensor {
     let mut result = Vec::new();
 
     for row in tensor {
-        let mut scaled_row = Vec::new();
+        let mut transformed_row = Vec::new();
         for element in row {
-            scaled_row.push(element * scalar);
+            transformed_row.push(operation(*element));
         }
-        result.push(scaled_row);
+        result.push(transformed_row);
     }
 
     result
@@ -224,8 +224,12 @@ mod tests {
     #[case(&vec![vec![1.0], vec![2.0]], 3.0, vec![vec![3.0], vec![6.0]])]
     #[case(&vec![vec![1.0, 2.0], vec![3.0, 4.0]], 2.0, vec![vec![2.0, 4.0], vec![6.0, 8.0]])]
     #[case(&vec![vec![]], 2.0, vec![vec![]])]
-    fn test_scale(#[case] tensor: &RawTensor, #[case] scalar: f32, #[case] expected: RawTensor) {
-        assert_tensor_eq!(scale(tensor, scalar), expected);
+    fn test_operation(
+        #[case] tensor: &RawTensor,
+        #[case] scalar: f32,
+        #[case] expected: RawTensor,
+    ) {
+        assert_tensor_eq!(apply(tensor, |x| x * scalar), expected);
     }
 
     #[rstest]
