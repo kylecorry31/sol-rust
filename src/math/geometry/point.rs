@@ -1,3 +1,5 @@
+use crate::math::linear_algebra::Vector2D;
+
 use super::{Translate2D, euclidean_distance};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -17,6 +19,14 @@ impl Point2D {
 
     pub fn new(x: f32, y: f32) -> Self {
         Point2D { x, y }
+    }
+}
+
+impl std::ops::Sub for Point2D {
+    type Output = Vector2D;
+
+    fn sub(self, other: Self) -> Self::Output {
+        Vector2D::new(self.x - other.x, self.y - other.y)
     }
 }
 
@@ -88,5 +98,24 @@ mod tests {
         let p1 = Point2D::new(x1, y1);
         let p2 = Point2D::new(x2, y2);
         assert_approx_eq!(p1.angle(&p2), expected);
+    }
+
+    #[rstest]
+    #[case(1.0, 2.0, 3.0, 4.0, -2.0, -2.0)]
+    #[case(0.0, 0.0, 1.0, 1.0, -1.0, -1.0)]
+    #[case(-1.0, -2.0, 2.0, 3.0, -3.0, -5.0)]
+    fn test_sub(
+        #[case] x1: f32,
+        #[case] y1: f32,
+        #[case] x2: f32,
+        #[case] y2: f32,
+        #[case] expected_x: f32,
+        #[case] expected_y: f32,
+    ) {
+        let p1 = Point2D::new(x1, y1);
+        let p2 = Point2D::new(x2, y2);
+        let result = p1 - p2;
+        assert_eq!(result.x, expected_x);
+        assert_eq!(result.y, expected_y);
     }
 }

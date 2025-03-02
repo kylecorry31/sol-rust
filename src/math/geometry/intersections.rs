@@ -1,4 +1,4 @@
-use crate::math::utils::is_approximately_zero;
+use crate::math::{algebra::solve_quadratic, arithmetic::square, utils::is_approximately_zero};
 
 use super::{Circle, Line, Point2D, Polygon};
 
@@ -97,41 +97,23 @@ pub fn intersects_line_line(line1: &Line, line2: &Line) -> bool {
 }
 
 pub fn intercepts_circle_line(circle: &Circle, line: &Line) -> Vec<Point2D> {
-    let center_direction = Point2D::new(
-        circle.center.x - line.start.x,
-        circle.center.y - line.start.y,
-    );
-
-    // Calculate vector representing line direction
-    let line_direction = Point2D::new(line.end.x - line.start.x, line.end.y - line.start.y);
+    let center_direction = circle.center - line.start;
+    let line_direction = line.end - line.start;
 
     // Calculate quadratic coefficients
-    let a = line_direction.x * line_direction.x + line_direction.y * line_direction.y; // line_direction.dot(line_direction)
-    let b = 2.0 * (center_direction.x * line_direction.x + center_direction.y * line_direction.y); // 2*center_direction.dot(line_direction)
-    let c = center_direction.x * center_direction.x + center_direction.y * center_direction.y
-        - circle.radius * circle.radius; // center_direction.dot(center_direction) - r*r
+    let a = line_direction.dot(&line_direction);
+    let b = 2.0 * center_direction.dot(&line_direction);
+    let c = center_direction.dot(&center_direction) - square(circle.radius);
 
-    let discriminant = b * b - 4.0 * a * c;
-    if discriminant < 0.0 {
-        return Vec::new();
-    }
-
-    let discriminant = discriminant.sqrt();
-    let t1 = (-b - discriminant) / (2.0 * a);
-    let t2 = (-b + discriminant) / (2.0 * a);
-
+    let roots = solve_quadratic(a, b, c);
     let mut intersections = Vec::new();
-    if (0.0..=1.0).contains(&t1) {
-        intersections.push(Point2D::new(
-            line.start.x + t1 * line_direction.x,
-            line.start.y + t1 * line_direction.y,
-        ));
-    }
-    if (0.0..=1.0).contains(&t2) {
-        intersections.push(Point2D::new(
-            line.start.x + t2 * line_direction.x,
-            line.start.y + t2 * line_direction.y,
-        ));
+    for t in roots {
+        if (0.0..=1.0).contains(&t) {
+            intersections.push(Point2D::new(
+                line.start.x + t * line_direction.x,
+                line.start.y + t * line_direction.y,
+            ));
+        }
     }
     intersections
 }
