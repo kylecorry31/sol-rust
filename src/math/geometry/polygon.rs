@@ -1,6 +1,6 @@
 use crate::math::utils::is_approximately_zero;
 
-use super::{Point2D, Shape2D, Translate2D};
+use super::{Circle, Line, Point2D, Shape2D, Translate2D};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Polygon {
@@ -59,11 +59,44 @@ impl Shape2D for Polygon {
         }
         inside
     }
+
+    fn intersects_circle(&self, circle: &Circle) -> bool {
+        circle.intersects_polygon(self)
+    }
+
+    fn intersects_line(&self, line: &Line) -> bool {
+        // Check to see if each line intersects with an edge OR if the line's start point is contained by the polygon
+        for edge in self.edges() {
+            if edge.intersects_line(line) {
+                return true;
+            }
+        }
+        self.contains(&line.start)
+    }
+
+    fn intersects_polygon(&self, polygon: &Polygon) -> bool {
+        for edge in self.edges() {
+            if polygon.intersects_line(&edge) {
+                return true;
+            }
+        }
+        false
+    }
 }
 
 impl Polygon {
     pub fn new(vertices: Vec<Point2D>) -> Self {
         Polygon { vertices }
+    }
+
+    pub fn edges(&self) -> Vec<Line> {
+        let mut edges = Vec::with_capacity(self.vertices.len());
+        for i in 0..self.vertices.len() {
+            let start = self.vertices[i];
+            let end = self.vertices[(i + 1) % self.vertices.len()];
+            edges.push(Line::new(start, end));
+        }
+        edges
     }
 
     // Helper methods for common shapes
@@ -251,5 +284,90 @@ mod tests {
         let pentagon = Polygon::new(vec![p1, p2, p3, p4, p5]);
         let point = Point2D::new(px, py);
         assert_eq!(pentagon.contains(&point), expected);
+    }
+
+    #[rstest]
+    #[case(0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, true)] // Lines intersect
+    #[case(0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 2.0, 0.0, 3.0, 0.0, false)] // Lines not intersecting
+    #[case(0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.25, 0.25, 0.5, 0.5, true)] // Line fully contained
+    fn test_triangle_line_intersection(
+        #[case] x1: f32,
+        #[case] y1: f32,
+        #[case] x2: f32,
+        #[case] y2: f32,
+        #[case] x3: f32,
+        #[case] y3: f32,
+        #[case] lx1: f32,
+        #[case] ly1: f32,
+        #[case] lx2: f32,
+        #[case] ly2: f32,
+        #[case] expected: bool,
+    ) {
+        let p1 = Point2D::new(x1, y1);
+        let p2 = Point2D::new(x2, y2);
+        let p3 = Point2D::new(x3, y3);
+        let triangle = Polygon::triangle(p1, p2, p3);
+        let line = Line::new(Point2D::new(lx1, ly1), Point2D::new(lx2, ly2));
+        assert_eq!(triangle.intersects_line(&line), expected);
+    }
+
+    #[rstest]
+    #[case(0.0, 0.0, 2.0, 0.0, 2.0, 2.0, 0.0, 2.0, 1.0, 1.0, 1.0, true)] // Circle intersects
+    #[case(0.0, 0.0, 2.0, 0.0, 2.0, 2.0, 0.0, 2.0, 4.0, 4.0, 1.0, false)] // Circle outside
+    #[case(0.0, 0.0, 2.0, 0.0, 2.0, 2.0, 0.0, 2.0, 1.0, 1.0, 0.5, true)] // Circle inside rectangle
+    #[case(0.0, 0.0, 2.0, 0.0, 2.0, 2.0, 0.0, 2.0, 1.0, 1.0, 2.0, true)] // Rectangle inside circle
+    fn test_rectangle_circle_intersection(
+        #[case] x1: f32,
+        #[case] y1: f32,
+        #[case] x2: f32,
+        #[case] y2: f32,
+        #[case] x3: f32,
+        #[case] y3: f32,
+        #[case] x4: f32,
+        #[case] y4: f32,
+        #[case] cx: f32,
+        #[case] cy: f32,
+        #[case] r: f32,
+        #[case] expected: bool,
+    ) {
+        let p1 = Point2D::new(x1, y1);
+        let p2 = Point2D::new(x2, y2);
+        let p3 = Point2D::new(x3, y3);
+        let p4 = Point2D::new(x4, y4);
+        let rectangle = Polygon::rectangle(p1, p2, p3, p4);
+        let circle = Circle::new(Point2D::new(cx, cy), r);
+        assert_eq!(rectangle.intersects_circle(&circle), expected);
+    }
+
+    #[rstest]
+    #[case(0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.5, 0.0, 1.5, 0.0, 1.5, 1.0, true)] // Polygons intersect
+    #[case(0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 2.0, 2.0, 3.0, 2.0, 2.0, 3.0, false)] // Polygons separate
+    #[case(0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.25, 0.25, 0.75, 0.25, 0.5, 0.75, true)] // One triangle inside other
+    fn test_polygon_intersection(
+        #[case] x1: f32,
+        #[case] y1: f32,
+        #[case] x2: f32,
+        #[case] y2: f32,
+        #[case] x3: f32,
+        #[case] y3: f32,
+        #[case] px1: f32,
+        #[case] py1: f32,
+        #[case] px2: f32,
+        #[case] py2: f32,
+        #[case] px3: f32,
+        #[case] py3: f32,
+        #[case] expected: bool,
+    ) {
+        let triangle1 = Polygon::triangle(
+            Point2D::new(x1, y1),
+            Point2D::new(x2, y2),
+            Point2D::new(x3, y3),
+        );
+        let triangle2 = Polygon::triangle(
+            Point2D::new(px1, py1),
+            Point2D::new(px2, py2),
+            Point2D::new(px3, py3),
+        );
+        assert_eq!(triangle1.intersects_polygon(&triangle2), expected);
     }
 }
