@@ -114,6 +114,10 @@ pub fn combine(
     tensor2: &RawTensor,
     operation: impl Fn(f32, f32) -> f32,
 ) -> RawTensor {
+    if tensor1.len() != tensor2.len() || tensor1[0].len() != tensor2[0].len() {
+        panic!("Tensors must have the same dimensions");
+    }
+
     let mut result = Vec::new();
 
     for (row1, row2) in tensor1.iter().zip(tensor2) {
@@ -179,6 +183,188 @@ pub fn aggregate_columns(
         result.push(vec![col_result]);
     }
     result
+}
+
+pub fn inverse(tensor: &RawTensor) -> RawTensor {
+    if rows(tensor) != columns(tensor) {
+        panic!("Matrix must be square to calculate inverse");
+    }
+
+    let det = determinant(tensor);
+    if det == 0.0 {
+        // No inverse exists
+        return create_tensor(rows(tensor), columns(tensor));
+    }
+
+    let adj = adjugate(tensor);
+    let trans = transpose(&adj);
+    let scalar = 1.0 / det;
+    map(&trans, |x| x * scalar)
+}
+
+pub fn adjugate(tensor: &RawTensor) -> RawTensor {
+    if rows(tensor) != columns(tensor) {
+        panic!("Matrix must be square to adjugate");
+    }
+
+    let mut result = create_tensor(rows(tensor), columns(tensor));
+
+    for r in 0..rows(tensor) {
+        for c in 0..columns(tensor) {
+            let row_multiplier = if r % 2 == 0 { 1.0 } else { -1.0 };
+            let col_multiplier = if c % 2 == 0 { 1.0 } else { -1.0 };
+            let cofactor_det = determinant(&cofactor(tensor, r, c));
+            result[r][c] = cofactor_det * col_multiplier * row_multiplier;
+        }
+    }
+
+    result
+}
+
+pub fn determinant(tensor: &RawTensor) -> f32 {
+    if rows(tensor) != columns(tensor) {
+        panic!("Matrix must be square to calculate determinant");
+    }
+
+    if rows(tensor) == 1 && columns(tensor) == 1 {
+        tensor[0][0]
+    } else if rows(tensor) == 2 && columns(tensor) == 2 {
+        tensor[0][0] * tensor[1][1] - tensor[0][1] * tensor[1][0]
+    } else {
+        let mut multiplier = 1.0;
+        let mut sum = 0.0;
+        for c in 0..columns(tensor) {
+            sum += tensor[0][c] * determinant(&cofactor(tensor, 0, c)) * multiplier;
+            multiplier *= -1.0;
+        }
+        sum
+    }
+}
+
+pub fn cofactor(tensor: &RawTensor, r: usize, c: usize) -> RawTensor {
+    let mut result = create_tensor(rows(tensor) - 1, columns(tensor) - 1);
+
+    for r1 in 0..rows(tensor) - 1 {
+        for c1 in 0..columns(tensor) - 1 {
+            let sr = if r1 < r { r1 } else { r1 + 1 };
+            let sc = if c1 < c { c1 } else { c1 + 1 };
+            result[r1][c1] = tensor[sr][sc];
+        }
+    }
+
+    result
+}
+
+pub fn solve_linear(tensor: &RawTensor, vector: &RawTensor) -> RawTensor {
+    if rows(tensor) != columns(tensor) {
+        panic!("Matrix must be square");
+    }
+    if rows(tensor) != rows(vector) {
+        panic!("Matrix rows must be the same size as the vector");
+    }
+
+    let n = columns(tensor);
+    let mut augmented = Vec::new();
+    for (row, b) in tensor.iter().zip(vector.iter()) {
+        let mut new_row = row.clone();
+        new_row.extend(b);
+        augmented.push(new_row);
+    }
+
+    // Convert to row echelon form
+    for i in 0..n {
+        let mut max_row = i;
+        for j in i + 1..n {
+            if augmented[j][i].abs() > augmented[max_row][i].abs() {
+                max_row = j;
+            }
+        }
+
+        augmented.swap(i, max_row);
+
+        for j in i + 1..n {
+            let factor = augmented[j][i] / augmented[i][i];
+            for k in i..n + 1 {
+                augmented[j][k] -= augmented[i][k] * factor;
+            }
+        }
+    }
+
+    // Back substitution
+    let mut x = vec![0.0; n];
+    for i in (0..n).rev() {
+        x[i] = augmented[i][n] / augmented[i][i];
+        for j in (0..i).rev() {
+            augmented[j][n] -= augmented[j][i] * x[i];
+        }
+    }
+
+    vec![x]
+}
+
+pub fn least_norm(tensor: &RawTensor, vector: &[f32]) -> Vec<f32> {
+    let q_r = qr(&transpose(tensor));
+    let q = q_r.0;
+    let r = q_r.1;
+
+    let r_inv = inverse(&r);
+    let r_inv_t = transpose(&r_inv);
+    let q_r_inv_t = dot(&q, &r_inv_t);
+
+    let b_matrix = transpose(&vec![vector.to_vec()]);
+    let y = dot(&q_r_inv_t, &b_matrix);
+
+    transpose(&y)[0].clone()
+}
+
+pub fn least_squares(tensor: &RawTensor, vector: &[f32]) -> Vec<f32> {
+    let is_underdetermined = rows(tensor) < columns(tensor);
+
+    if is_underdetermined {
+        return least_norm(tensor, vector);
+    }
+
+    let jt = transpose(tensor);
+    let jtj = dot(&jt, tensor);
+    let jtr = dot(&jt, &transpose(&vec![vector.to_vec()]));
+
+    solve_linear(&jtj, &jtr)[0].clone()
+}
+
+pub fn qr(tensor: &RawTensor) -> (RawTensor, RawTensor) {
+    let r = rows(tensor);
+    let c = columns(tensor);
+
+    let mut q = create_tensor(r, c);
+    let mut r_mat = create_tensor(c, c);
+
+    for j in 0..c {
+        let mut v = Vec::new();
+        for i in 0..r {
+            v.push(vec![tensor[i][j]]);
+        }
+
+        for i in 0..j {
+            let mut qi = Vec::new();
+            for k in 0..r {
+                qi.push(vec![q[k][i]]);
+            }
+
+            r_mat[i][j] = dot(&transpose(&qi), &v)[0][0];
+
+            let qi_scaled = map(&qi, |x| x * r_mat[i][j]);
+            v = subtract(&v, &qi_scaled);
+        }
+
+        r_mat[j][j] = magnitude(&v);
+        let v_normalized = map(&v, |x| x / r_mat[j][j]);
+
+        for i in 0..r {
+            q[i][j] = v_normalized[i][0];
+        }
+    }
+
+    (q, r_mat)
 }
 
 #[cfg(test)]
@@ -331,5 +517,73 @@ mod tests {
     #[case(&vec![vec![]], 0.0, 0.0)]
     fn test_aggregate(#[case] tensor: &RawTensor, #[case] initial: f32, #[case] expected: f32) {
         assert_approx_eq!(aggregate(tensor, initial, |acc, x| acc + x), expected);
+    }
+
+    #[rstest]
+    #[case(&vec![vec![2.0, -3.0, 1.0], vec![2.0, 0.0, -1.0], vec![1.0, 4.0, 5.0]], 49.0)]
+    #[case(&vec![vec![1.0, 2.0], vec![3.0, 4.0]], -2.0)]
+    fn test_determinant(#[case] tensor: &RawTensor, #[case] expected: f32) {
+        assert_approx_eq!(determinant(tensor), expected);
+    }
+
+    #[rstest]
+    #[case(
+        &vec![vec![1.0, 2.0], vec![3.0, 4.0]],
+        vec![vec![-2.0, 1.0], vec![1.5, -0.5]]
+    )]
+    #[case(
+        &vec![vec![1.0, 2.0, 3.0], vec![0.0, 1.0, 4.0], vec![5.0, 6.0, 0.0]],
+        vec![vec![-24.0, 18.0, 5.0], vec![20.0, -15.0, -4.0], vec![-5.0, 4.0, 1.0]]
+    )]
+    fn test_inverse(#[case] tensor: &RawTensor, #[case] expected: RawTensor) {
+        assert_tensor_eq!(inverse(tensor), expected);
+    }
+
+    #[rstest]
+    fn test_solve_linear() {
+        let test1_tensor = vec![vec![2.0, 1.0], vec![1.0, -1.0]];
+        let test1_vector = vec![vec![-4.0], vec![-2.0]];
+        let test1_expected = vec![vec![-2.0, 0.0]];
+        assert_tensor_eq!(solve_linear(&test1_tensor, &test1_vector), test1_expected);
+
+        let test2_tensor = vec![
+            vec![2.0, -5.0, 3.0],
+            vec![3.0, -1.0, 4.0],
+            vec![1.0, 3.0, 2.0],
+        ];
+        let test2_vector = vec![vec![8.0], vec![7.0], vec![-3.0]];
+        let test2_expected = vec![vec![6.0, -1.0, -3.0]];
+        assert_tensor_eq!(solve_linear(&test2_tensor, &test2_vector), test2_expected);
+    }
+
+    #[rstest]
+    fn test_least_squares() {
+        // Well conditioned
+        let a1 = vec![vec![2.0, 1.0], vec![1.0, -1.0]];
+        let b1 = vec![7.0, -1.0];
+        let expected1 = vec![2.0, 3.0];
+        let actual1 = least_squares(&a1, &b1);
+        assert_eq!(2, actual1.len());
+        assert_approx_eq!(actual1[0], expected1[0]);
+        assert_approx_eq!(actual1[1], expected1[1]);
+
+        // Overdetermined
+        let a2 = vec![vec![1.0, 1.0], vec![1.0, -1.0], vec![1.0, 0.0]];
+        let b2 = vec![3.0, 1.0, 2.0];
+        let expected2 = vec![2.0, 1.0];
+        let actual2 = least_squares(&a2, &b2);
+        assert_eq!(2, actual2.len());
+        assert_approx_eq!(actual2[0], expected2[0]);
+        assert_approx_eq!(actual2[1], expected2[1]);
+
+        // Underdetermined
+        let a3 = vec![vec![1.0, 1.0, 1.0], vec![0.0, 1.0, 2.0]];
+        let b3 = vec![6.0, 5.0];
+        let expected3 = vec![2.5, 2.0, 1.5];
+        let actual3 = least_squares(&a3, &b3);
+        assert_eq!(3, actual3.len());
+        assert_approx_eq!(actual3[0], expected3[0]);
+        assert_approx_eq!(actual3[1], expected3[1]);
+        assert_approx_eq!(actual3[2], expected3[2]);
     }
 }
